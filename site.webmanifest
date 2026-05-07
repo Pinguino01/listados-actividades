@@ -1,0 +1,23 @@
+{
+  "name": "Burger House Menu",
+  "short_name": "Burger House",
+  "description": "Menu digital de comida rapida.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff9ef",
+  "theme_color": "#d92228",
+  "icons": [
+    {
+      "src": "assets/app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
