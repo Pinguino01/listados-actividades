@@ -98,6 +98,12 @@ const previewName = document.querySelector("#previewName");
 const previewDescription = document.querySelector("#previewDescription");
 const previewPrice = document.querySelector("#previewPrice");
 
+const screensaver = document.querySelector("#screensaver");
+const screensaverImage = document.querySelector("#screensaverImage");
+const screensaverName = document.querySelector("#screensaverName");
+const screensaverDescription = document.querySelector("#screensaverDescription");
+const screensaverPrice = document.querySelector("#screensaverPrice");
+
 let activeCategory = "Todos";
 let currentImageData = "";
 let editingItemId = null;
@@ -720,3 +726,73 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replaceAll("`", "&#096;");
 }
+
+let screensaverTimer = null;
+let screensaverInterval = null;
+let currentScreensaverIndex = 0;
+
+function showScreensaverProduct() {
+  if (!items.length) return;
+
+  const item = items[currentScreensaverIndex % items.length];
+
+  screensaverImage.src = item.image;
+  screensaverName.textContent = item.name;
+  screensaverDescription.textContent = item.description;
+  screensaverPrice.textContent = `$${formatPrice(item.price)}`;
+}
+
+function startScreensaver() {
+  if (!items.length) return;
+
+  showScreensaverProduct();
+
+  screensaver.classList.add("active");
+
+  clearInterval(screensaverInterval);
+
+  screensaverInterval = setInterval(() => {
+    currentScreensaverIndex++;
+    showScreensaverProduct();
+  }, 5000);
+}
+
+function stopScreensaver() {
+  screensaver.classList.remove("active");
+
+  clearInterval(screensaverInterval);
+
+  resetScreensaverTimer();
+}
+
+function resetScreensaverTimer() {
+  clearTimeout(screensaverTimer);
+
+  screensaverTimer = setTimeout(() => {
+    startScreensaver();
+  }, 60000); // 1 minuto
+}
+
+[
+  "click",
+  "touchstart",
+  "mousemove",
+  "keydown",
+  "scroll"
+].forEach((eventName) => {
+  document.addEventListener(eventName, () => {
+
+  // Si el protector esta activo → cerrar inmediatamente
+  if (screensaver.classList.contains("active")) {
+    stopScreensaver();
+    return;
+  }
+
+  // Reiniciar contador de inactividad
+  resetScreensaverTimer();
+});
+});
+
+window.addEventListener("load", () => {
+  resetScreensaverTimer();
+});

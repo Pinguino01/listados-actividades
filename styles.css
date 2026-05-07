@@ -893,3 +893,71 @@ textarea:focus {
     width: 100%;
   }
 }
+
+
+.screensaver {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: none;
+  place-items: center;
+  overflow: hidden;
+}
+
+.screensaver.active {
+  display: grid;
+}
+
+.screensaver-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.screensaver img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  animation: zoomEffect 8s ease-in-out infinite alternate;
+}
+
+.screensaver-info {
+  position: absolute;
+  left: 40px;
+  bottom: 40px;
+  max-width: 500px;
+  color: white;
+  text-shadow: 0 4px 20px rgba(0,0,0,.8);
+  background: rgba(0,0,0,.35);
+  padding: 20px;
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
+}
+
+.screensaver-info h2 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 5vw, 5rem);
+}
+
+.screensaver-info p {
+  margin: 0 0 14px;
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.screensaver-info strong {
+  font-size: 2rem;
+  color: #7dff9b;
+}
+
+@keyframes zoomEffect {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
