@@ -1,4 +1,5 @@
 const STORAGE_KEY = "burger-house-menu";
+const CART_KEY = "burger-house-cart";
 const AUTH_KEY = "burger-house-admin-auth";
 const ADMIN_USER = "admin";
 const ADMIN_PASSWORD = "admin123";
@@ -42,6 +43,22 @@ const menuGrid = document.querySelector("#menuGrid");
 const itemCount = document.querySelector("#itemCount");
 const emptyState = document.querySelector("#emptyState");
 const tabs = document.querySelectorAll(".tab");
+const cartEntry = document.querySelector("#cartEntry");
+const cartCount = document.querySelector("#cartCount");
+const cartModal = document.querySelector("#cartModal");
+const closeCart = document.querySelector("#closeCart");
+const cartItems = document.querySelector("#cartItems");
+const cartEmpty = document.querySelector("#cartEmpty");
+const cartTotal = document.querySelector("#cartTotal");
+const clearCart = document.querySelector("#clearCart");
+const productModal = document.querySelector("#productModal");
+const closeProduct = document.querySelector("#closeProduct");
+const detailImage = document.querySelector("#detailImage");
+const detailCategory = document.querySelector("#detailCategory");
+const detailName = document.querySelector("#detailName");
+const detailDescription = document.querySelector("#detailDescription");
+const detailPrice = document.querySelector("#detailPrice");
+const detailAddCart = document.querySelector("#detailAddCart");
 const adminEntry = document.querySelector("#adminEntry");
 const adminModal = document.querySelector("#adminModal");
 const closeAdmin = document.querySelector("#closeAdmin");
@@ -69,10 +86,13 @@ const previewPrice = document.querySelector("#previewPrice");
 let activeCategory = "Todos";
 let currentImageData = "";
 let editingItemId = null;
+let selectedProductId = null;
 let isAdminLoggedIn = sessionStorage.getItem(AUTH_KEY) === "true";
 let items = loadItems();
+let cart = loadCart();
 
 renderMenu();
+renderCart();
 renderAdminState();
 updatePreview();
 
@@ -101,6 +121,39 @@ adminModal.addEventListener("click", (event) => {
   if (event.target === adminModal) {
     adminModal.close();
   }
+});
+
+cartEntry.addEventListener("click", () => {
+  renderCart();
+  openDialog(cartModal);
+});
+
+closeCart.addEventListener("click", () => cartModal.close());
+
+cartModal.addEventListener("click", (event) => {
+  if (event.target === cartModal) {
+    cartModal.close();
+  }
+});
+
+clearCart.addEventListener("click", () => {
+  cart = [];
+  saveCart();
+  renderCart();
+});
+
+closeProduct.addEventListener("click", () => productModal.close());
+
+productModal.addEventListener("click", (event) => {
+  if (event.target === productModal) {
+    productModal.close();
+  }
+});
+
+detailAddCart.addEventListener("click", () => {
+  if (!selectedProductId) return;
+  addToCart(selectedProductId);
+  productModal.close();
 });
 
 loginForm.addEventListener("submit", (event) => {
@@ -192,9 +245,21 @@ logoutAdmin.addEventListener("click", () => {
 
 menuGrid.addEventListener("click", (event) => {
   const actionButton = event.target.closest("[data-action]");
-  if (!actionButton || !isAdminLoggedIn) return;
+  if (!actionButton) return;
 
   const { action, id } = actionButton.dataset;
+
+  if (action === "view") {
+    showProduct(id);
+    return;
+  }
+
+  if (action === "cart") {
+    addToCart(id);
+    return;
+  }
+
+  if (!isAdminLoggedIn) return;
 
   if (action === "edit") {
     startEdit(id);
@@ -221,6 +286,21 @@ function saveItems() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+function loadCart() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CART_KEY));
+    if (Array.isArray(stored)) return stored;
+  } catch {
+    localStorage.removeItem(CART_KEY);
+  }
+
+  return [];
+}
+
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
 function renderMenu() {
   const visibleItems = activeCategory === "Todos"
     ? items
@@ -239,6 +319,10 @@ function renderMenu() {
         <div class="card-footer">
           <span class="price">Bs ${formatPrice(item.price)}</span>
           <span class="pill">${escapeHtml(item.category)}</span>
+        </div>
+        <div class="customer-card-actions" aria-label="Acciones del producto">
+          <button class="ghost-button small-button" type="button" data-action="view" data-id="${escapeAttribute(item.id)}">Ver producto</button>
+          <button class="primary-button small-button" type="button" data-action="cart" data-id="${escapeAttribute(item.id)}">Añadir al carrito</button>
         </div>
         ${isAdminLoggedIn ? `
           <div class="admin-card-actions" aria-label="Acciones de administrador">
@@ -317,6 +401,73 @@ function deleteItem(id) {
   saveItems();
   if (editingItemId === id) resetForm();
   renderMenu();
+}
+
+function showProduct(id) {
+  const item = items.find((food) => food.id === id);
+  if (!item) return;
+
+  selectedProductId = id;
+  detailImage.src = item.image;
+  detailImage.alt = item.name;
+  detailCategory.textContent = item.category;
+  detailName.textContent = item.name;
+  detailDescription.textContent = item.description;
+  detailPrice.textContent = `Bs ${formatPrice(item.price)}`;
+  openDialog(productModal);
+}
+
+function addToCart(id) {
+  const item = items.find((food) => food.id === id);
+  if (!item) return;
+
+  const cartItem = cart.find((entry) => entry.id === id);
+  if (cartItem) {
+    cartItem.quantity += 1;
+  } else {
+    cart.push({ id, quantity: 1 });
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const totalQuantity = cart.reduce((sum, entry) => sum + entry.quantity, 0);
+  const cartRows = cart
+    .map((entry) => {
+      const item = items.find((food) => food.id === entry.id);
+      if (!item) return null;
+      return { ...item, quantity: entry.quantity };
+    })
+    .filter(Boolean);
+
+  cartCount.textContent = totalQuantity;
+  cartEmpty.hidden = cartRows.length > 0;
+  cartItems.hidden = cartRows.length === 0;
+
+  cartItems.innerHTML = cartRows.map((item) => `
+    <article class="cart-row">
+      <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}">
+      <div>
+        <strong>${escapeHtml(item.name)}</strong>
+        <span>${item.quantity} x Bs ${formatPrice(item.price)}</span>
+      </div>
+      <b>Bs ${formatPrice(item.price * item.quantity)}</b>
+    </article>
+  `).join("");
+
+  const total = cartRows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  cartTotal.textContent = `Bs ${formatPrice(total)}`;
+}
+
+function openDialog(dialog) {
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+    return;
+  }
+
+  dialog.setAttribute("open", "");
 }
 
 function readFileAsDataUrl(file) {

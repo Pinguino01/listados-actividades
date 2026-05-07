@@ -27,12 +27,24 @@
         <button class="tab" type="button" data-category="Postres">Postres</button>
       </nav>
 
-      <button class="admin-entry" id="adminEntry" type="button" aria-label="Ingresar como administrador" title="Administrador">
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
-          <path d="M4 21a8 8 0 0 1 16 0"></path>
-        </svg>
-      </button>
+      <div class="top-actions">
+        <button class="cart-entry" id="cartEntry" type="button" aria-label="Ver carrito" title="Carrito">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M6 6h15l-1.5 9h-12z"></path>
+            <path d="M6 6 5 3H2"></path>
+            <path d="M8 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+            <path d="M18 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+          </svg>
+          <span id="cartCount">0</span>
+        </button>
+
+        <button class="admin-entry" id="adminEntry" type="button" aria-label="Ingresar como administrador" title="Administrador">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
+            <path d="M4 21a8 8 0 0 1 16 0"></path>
+          </svg>
+        </button>
+      </div>
     </header>
 
     <main>
@@ -151,6 +163,57 @@
         </div>
       </form>
       </div>
+    </dialog>
+
+    <dialog class="product-modal" id="productModal">
+      <article class="product-detail">
+        <button class="icon-button close-detail" id="closeProduct" type="button" aria-label="Cerrar">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+        <img id="detailImage" alt="">
+        <div class="product-detail-content">
+          <span class="pill" id="detailCategory">Categoria</span>
+          <h2 id="detailName">Producto</h2>
+          <p id="detailDescription">Descripcion del producto.</p>
+          <div class="detail-footer">
+            <strong id="detailPrice">Bs 0.00</strong>
+            <button class="primary-button" id="detailAddCart" type="button">Añadir al carrito</button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
+    <dialog class="cart-modal" id="cartModal">
+      <section class="cart-panel">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Pedido</p>
+            <h2>Carrito</h2>
+          </div>
+          <button class="icon-button" id="closeCart" type="button" aria-label="Cerrar">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-empty" id="cartEmpty">Tu carrito esta vacio.</div>
+
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">Bs 0.00</strong>
+        </div>
+
+        <div class="modal-actions">
+          <button class="ghost-button" id="clearCart" type="button">Vaciar carrito</button>
+          <button class="primary-button" type="button">Confirmar pedido</button>
+        </div>
+      </section>
     </dialog>
 
     <script src="app.js"></script>
