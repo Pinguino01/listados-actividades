@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=6">
   </head>
   <body>
     <header class="topbar">
@@ -203,6 +203,7 @@
 
         <div class="cart-items" id="cartItems"></div>
         <div class="cart-empty" id="cartEmpty">Tu carrito esta vacio.</div>
+        <div class="cart-warning" id="cartWarning" hidden>NO HAY ARTICULOS EN EL CARRITO</div>
 
         <div class="cart-total">
           <span>Total</span>
@@ -211,11 +212,31 @@
 
         <div class="modal-actions">
           <button class="ghost-button" id="clearCart" type="button">Vaciar carrito</button>
-          <button class="primary-button" type="button">Confirmar pedido</button>
+          <button class="primary-button" id="confirmOrder" type="button">Confirmar pedido</button>
         </div>
       </section>
     </dialog>
 
-    <script src="app.js"></script>
+    <dialog class="qr-modal" id="qrModal">
+      <section class="qr-panel">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Pago</p>
+            <h2>Escanea el QR</h2>
+          </div>
+          <button class="icon-button" id="closeQr" type="button" aria-label="Cerrar">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <img class="qr-image" id="paymentQr" alt="QR para abrir Coopesa Personal">
+        <a class="qr-link" id="paymentLink" href="https://apps.apple.com/do/app/coopesa-personal/id6760831661" target="_blank" rel="noreferrer">Abrir enlace de pago</a>
+      </section>
+    </dialog>
+
+    <script src="app.js?v=6"></script>
   </body>
 </html>

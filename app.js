@@ -3,6 +3,7 @@ const CART_KEY = "burger-house-cart";
 const AUTH_KEY = "burger-house-admin-auth";
 const ADMIN_USER = "admin";
 const ADMIN_PASSWORD = "admin123";
+const PAYMENT_LINK = "https://apps.apple.com/do/app/coopesa-personal/id6760831661";
 
 const starterItems = [
   {
@@ -49,8 +50,14 @@ const cartModal = document.querySelector("#cartModal");
 const closeCart = document.querySelector("#closeCart");
 const cartItems = document.querySelector("#cartItems");
 const cartEmpty = document.querySelector("#cartEmpty");
+const cartWarning = document.querySelector("#cartWarning");
 const cartTotal = document.querySelector("#cartTotal");
 const clearCart = document.querySelector("#clearCart");
+const confirmOrder = document.querySelector("#confirmOrder");
+const qrModal = document.querySelector("#qrModal");
+const closeQr = document.querySelector("#closeQr");
+const paymentQr = document.querySelector("#paymentQr");
+const paymentLink = document.querySelector("#paymentLink");
 const productModal = document.querySelector("#productModal");
 const closeProduct = document.querySelector("#closeProduct");
 const detailImage = document.querySelector("#detailImage");
@@ -136,10 +143,51 @@ cartModal.addEventListener("click", (event) => {
   }
 });
 
+cartItems.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-cart-action]");
+  if (!button) return;
+
+  const { cartAction, id } = button.dataset;
+
+  if (cartAction === "increase") {
+    changeCartQuantity(id, 1);
+    return;
+  }
+
+  if (cartAction === "decrease") {
+    changeCartQuantity(id, -1);
+    return;
+  }
+
+  if (cartAction === "remove") {
+    removeFromCart(id);
+  }
+});
+
 clearCart.addEventListener("click", () => {
   cart = [];
   saveCart();
   renderCart();
+});
+
+confirmOrder.addEventListener("click", () => {
+  if (cart.length === 0) {
+    cartWarning.hidden = false;
+    return;
+  }
+
+  cartWarning.hidden = true;
+  paymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(PAYMENT_LINK)}`;
+  paymentLink.href = PAYMENT_LINK;
+  openDialog(qrModal);
+});
+
+closeQr.addEventListener("click", () => qrModal.close());
+
+qrModal.addEventListener("click", (event) => {
+  if (event.target === qrModal) {
+    qrModal.close();
+  }
 });
 
 closeProduct.addEventListener("click", () => productModal.close());
@@ -445,20 +493,49 @@ function renderCart() {
   cartCount.textContent = totalQuantity;
   cartEmpty.hidden = cartRows.length > 0;
   cartItems.hidden = cartRows.length === 0;
+  cartWarning.hidden = true;
 
   cartItems.innerHTML = cartRows.map((item) => `
     <article class="cart-row">
       <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}">
-      <div>
+      <div class="cart-row-info">
         <strong>${escapeHtml(item.name)}</strong>
-        <span>${item.quantity} x Bs ${formatPrice(item.price)}</span>
+        <span>Bs ${formatPrice(item.price)} c/u</span>
+        <div class="quantity-control" aria-label="Cantidad de ${escapeAttribute(item.name)}">
+          <button type="button" data-cart-action="decrease" data-id="${escapeAttribute(item.id)}" aria-label="Restar ${escapeAttribute(item.name)}">-</button>
+          <output>${item.quantity}</output>
+          <button type="button" data-cart-action="increase" data-id="${escapeAttribute(item.id)}" aria-label="Sumar ${escapeAttribute(item.name)}">+</button>
+        </div>
       </div>
-      <b>Bs ${formatPrice(item.price * item.quantity)}</b>
+      <div class="cart-row-total">
+        <b>Bs ${formatPrice(item.price * item.quantity)}</b>
+        <button class="remove-cart-item" type="button" data-cart-action="remove" data-id="${escapeAttribute(item.id)}">Eliminar</button>
+      </div>
     </article>
   `).join("");
 
   const total = cartRows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   cartTotal.textContent = `Bs ${formatPrice(total)}`;
+}
+
+function changeCartQuantity(id, amount) {
+  const cartItem = cart.find((entry) => entry.id === id);
+  if (!cartItem) return;
+
+  cartItem.quantity += amount;
+  if (cartItem.quantity <= 0) {
+    removeFromCart(id);
+    return;
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter((entry) => entry.id !== id);
+  saveCart();
+  renderCart();
 }
 
 function openDialog(dialog) {
