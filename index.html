@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Menu Burger House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Volver al menu">
+        <span class="brand-mark">BH</span>
+        <span>
+          <strong>Burger House</strong>
+          <small>Menu digital</small>
+        </span>
+      </a>
+
+      <nav class="category-tabs" aria-label="Categorias del menu">
+        <button class="tab is-active" type="button" data-category="Todos">Todos</button>
+        <button class="tab" type="button" data-category="Hamburguesas">Hamburguesas</button>
+        <button class="tab" type="button" data-category="Combos">Combos</button>
+        <button class="tab" type="button" data-category="Bebidas">Bebidas</button>
+        <button class="tab" type="button" data-category="Postres">Postres</button>
+      </nav>
+
+      <button class="admin-entry" id="adminEntry" type="button" aria-label="Ingresar como administrador" title="Administrador">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
+          <path d="M4 21a8 8 0 0 1 16 0"></path>
+        </svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Listo para ordenar</p>
+          <h1>Menu rapido, visual y facil de actualizar</h1>
+          <p>El cliente siempre entra al menu. El administrador inicia sesion desde el icono superior derecho para gestionar productos.</p>
+        </div>
+        <div class="hero-plate" aria-hidden="true">
+          <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80" alt="">
+        </div>
+      </section>
+
+      <section class="menu-section" aria-labelledby="menuTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Catalogo</p>
+            <h2 id="menuTitle">Menu del dia</h2>
+          </div>
+          <span class="item-count" id="itemCount">0 productos</span>
+        </div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+        <div class="empty-state" id="emptyState" hidden>
+          <strong>No hay productos en esta categoria.</strong>
+          <span>Entra como administrador y agrega la primera comida.</span>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="admin-modal" id="adminModal">
+      <div class="admin-panel">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Administrador</p>
+            <h2 id="adminPanelTitle">Iniciar sesion</h2>
+          </div>
+          <button class="icon-button" id="closeAdmin" type="button" aria-label="Cerrar">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form class="login-form" id="loginForm">
+          <label>
+            <span>Usuario</span>
+            <input id="adminUser" name="adminUser" type="text" autocomplete="username" placeholder="admin" required>
+          </label>
+
+          <label>
+            <span>Contrasena</span>
+            <input id="adminPassword" name="adminPassword" type="password" autocomplete="current-password" placeholder="admin123" required>
+          </label>
+
+          <p class="login-error" id="loginError" role="alert" hidden>Usuario o contrasena incorrectos.</p>
+          <p class="login-hint">Usuario: <b>admin</b> / Contrasena: <b>admin123</b></p>
+
+          <button class="primary-button" type="submit">Entrar</button>
+        </form>
+
+      <form class="admin-form" id="adminForm" hidden>
+        <div class="form-grid">
+          <label>
+            <span>Nombre</span>
+            <input id="foodName" name="foodName" type="text" placeholder="Big Burger" required maxlength="48">
+          </label>
+
+          <label>
+            <span>Precio</span>
+            <input id="foodPrice" name="foodPrice" type="number" placeholder="29.90" required min="0" step="0.01">
+          </label>
+
+          <label>
+            <span>Categoria</span>
+            <select id="foodCategory" name="foodCategory">
+              <option>Hamburguesas</option>
+              <option>Combos</option>
+              <option>Bebidas</option>
+              <option>Postres</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Imagen desde archivo</span>
+            <input id="foodImageFile" name="foodImageFile" type="file" accept="image/*">
+          </label>
+
+          <label class="full">
+            <span>URL de imagen</span>
+            <input id="foodImageUrl" name="foodImageUrl" type="url" placeholder="https://...">
+          </label>
+
+          <label class="full">
+            <span>Descripcion</span>
+            <textarea id="foodDescription" name="foodDescription" placeholder="Pan suave, carne jugosa, queso y salsa especial." required maxlength="150"></textarea>
+          </label>
+        </div>
+
+        <div class="preview-card" id="previewCard">
+          <img id="previewImage" alt="">
+          <div>
+            <strong id="previewName">Vista previa</strong>
+            <span id="previewDescription">Completa los datos para ver como se vera en el menu.</span>
+          </div>
+          <b id="previewPrice">Bs 0.00</b>
+        </div>
+
+        <div class="modal-actions">
+          <button class="ghost-button" id="logoutAdmin" type="button">Cerrar sesion</button>
+          <button class="ghost-button" id="clearMenu" type="button">Limpiar menu</button>
+          <button class="ghost-button" id="cancelEdit" type="button" hidden>Cancelar edicion</button>
+          <button class="primary-button" id="saveFood" type="submit">Agregar producto</button>
+        </div>
+      </form>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
