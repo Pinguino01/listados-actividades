@@ -8,13 +8,13 @@
   "theme_color": "#1e9845",
   "icons": [
     {
-      "src": "assets/Amigos-burguer-logo.png?v=10",
+      "src": "assets/app-icon.png?v=11",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/Amigos-burguer-logo.png?v=10",
+      "src": "assets/app-icon.png?v=11",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

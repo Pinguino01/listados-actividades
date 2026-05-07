@@ -61,27 +61,22 @@ button {
 
 .main-brand-logo {
   display: block;
-  width: clamp(126px, 15vw, 210px);
-  max-height: 62px;
+  width: clamp(132px, 15vw, 210px);
+  height: 70px;
   object-fit: contain;
 }
 
 .support-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   min-width: 0;
   padding-left: 16px;
   border-left: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .support-brand img {
-  width: clamp(118px, 14vw, 190px);
-  max-height: 36px;
+  width: clamp(154px, 17vw, 240px);
+  height: 70px;
   object-fit: contain;
 }
 
@@ -180,33 +175,6 @@ main {
   font-size: clamp(2.2rem, 5vw, 5.4rem);
   line-height: 0.94;
   letter-spacing: 0;
-}
-
-.hero-support {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: max-content;
-  max-width: 100%;
-  margin-bottom: 18px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 10px 24px rgba(16, 88, 41, 0.08);
-}
-
-.hero-support span {
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.hero-support img {
-  width: 118px;
-  max-height: 72px;
-  object-fit: contain;
 }
 
 .hero-copy p:last-child {
@@ -784,21 +752,13 @@ textarea:focus {
   }
 
   .main-brand-logo {
-    width: 96px;
-    max-height: 54px;
-  }
-
-  .support-brand span {
-    display: none;
+    width: 102px;
+    height: 54px;
   }
 
   .support-brand img {
-    width: 156px;
-  }
-
-  .hero-support {
-    width: 100%;
-    justify-content: center;
+    width: 122px;
+    height: 54px;
   }
 
   .hero-copy h1 {
