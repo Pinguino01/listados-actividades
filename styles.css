@@ -582,6 +582,93 @@ main {
   margin-top: 22px;
 }
 
+.admin-content {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.admin-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--green-soft);
+}
+
+.admin-tab {
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--green-dark);
+  font-weight: 800;
+}
+
+.admin-tab.is-active {
+  background: var(--primary);
+  color: white;
+}
+
+.admin-view {
+  display: none;
+}
+
+.admin-view.is-active {
+  display: block;
+}
+
+.orders-list {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7fcf8;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+}
+
+.order-card-header strong,
+.order-card-header span {
+  display: block;
+}
+
+.order-card-header span,
+.order-item small {
+  color: var(--muted);
+}
+
+.order-card-header b {
+  color: var(--primary);
+  font-size: 1.15rem;
+}
+
+.order-items {
+  display: grid;
+  gap: 8px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
 .login-error {
   margin: 0;
   border-radius: 8px;

@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=12">
   </head>
   <body>
     <header class="topbar">
@@ -103,21 +103,27 @@
         <form class="login-form" id="loginForm">
           <label>
             <span>Usuario</span>
-            <input id="adminUser" name="adminUser" type="text" autocomplete="username" placeholder="admin" required>
+            <input id="adminUser" name="adminUser" type="text" autocomplete="username" placeholder="*******" required>
           </label>
 
           <label>
             <span>Contrasena</span>
-            <input id="adminPassword" name="adminPassword" type="password" autocomplete="current-password" placeholder="admin123" required>
+            <input id="adminPassword" name="adminPassword" type="password" autocomplete="current-password" placeholder="*******" required>
           </label>
 
           <p class="login-error" id="loginError" role="alert" hidden>Usuario o contrasena incorrectos.</p>
-          <p class="login-hint">Usuario: <b>admin</b> / Contrasena: <b>admin123</b></p>
 
           <button class="primary-button" type="submit">Entrar</button>
         </form>
 
-      <form class="admin-form" id="adminForm" hidden>
+        <div class="admin-content" id="adminContent" hidden>
+          <div class="admin-tabs" aria-label="Opciones de administrador">
+            <button class="admin-tab is-active" id="showProductsAdmin" type="button">Agregar productos</button>
+            <button class="admin-tab" id="showOrdersAdmin" type="button">Ver pedidos</button>
+          </div>
+
+          <section class="admin-view is-active" id="productsAdminView">
+      <form class="admin-form" id="adminForm">
         <div class="form-grid">
           <label>
             <span>Nombre</span>
@@ -126,7 +132,7 @@
 
           <label>
             <span>Precio</span>
-            <input id="foodPrice" name="foodPrice" type="number" placeholder="29.90" required min="0" step="0.01">
+            <input id="foodPrice" name="foodPrice" type="number" placeholder="250" required min="0" step="0.01">
           </label>
 
           <label>
@@ -161,7 +167,7 @@
             <strong id="previewName">Vista previa</strong>
             <span id="previewDescription">Completa los datos para ver como se vera en el menu.</span>
           </div>
-          <b id="previewPrice">Bs 0.00</b>
+          <b id="previewPrice">$0</b>
         </div>
 
         <div class="modal-actions">
@@ -171,6 +177,16 @@
           <button class="primary-button" id="saveFood" type="submit">Agregar producto</button>
         </div>
       </form>
+          </section>
+
+          <section class="admin-view" id="ordersAdminView">
+            <div class="orders-list" id="ordersList"></div>
+            <div class="empty-state" id="ordersEmpty">
+              <strong>No hay pedidos confirmados.</strong>
+              <span>Los pedidos apareceran aqui cuando el usuario confirme desde el carrito.</span>
+            </div>
+          </section>
+        </div>
       </div>
     </dialog>
 
@@ -188,7 +204,7 @@
           <h2 id="detailName">Producto</h2>
           <p id="detailDescription">Descripcion del producto.</p>
           <div class="detail-footer">
-            <strong id="detailPrice">Bs 0.00</strong>
+          <strong id="detailPrice">$0</strong>
             <button class="primary-button" id="detailAddCart" type="button">Añadir al carrito</button>
           </div>
         </div>
@@ -216,7 +232,7 @@
 
         <div class="cart-total">
           <span>Total</span>
-          <strong id="cartTotal">Bs 0.00</strong>
+          <strong id="cartTotal">$0</strong>
         </div>
 
         <div class="modal-actions">
@@ -247,6 +263,6 @@
       </section>
     </dialog>
 
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=12"></script>
   </body>
 </html>

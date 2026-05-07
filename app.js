@@ -1,5 +1,6 @@
 const STORAGE_KEY = "burger-house-menu";
 const CART_KEY = "burger-house-cart";
+const ORDERS_KEY = "burger-house-orders";
 const AUTH_KEY = "burger-house-admin-auth";
 const ADMIN_USER = "admin";
 const ADMIN_PASSWORD = "admin123";
@@ -9,7 +10,7 @@ const starterItems = [
   {
     id: crypto.randomUUID(),
     name: "Classic Burger",
-    price: 24.9,
+    price: 250,
     category: "Hamburguesas",
     description: "Carne a la plancha, queso cheddar, lechuga fresca y salsa especial.",
     image: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=700&q=80"
@@ -17,7 +18,7 @@ const starterItems = [
   {
     id: crypto.randomUUID(),
     name: "Combo Doble",
-    price: 39.9,
+    price: 250,
     category: "Combos",
     description: "Hamburguesa doble con papas doradas y bebida fria.",
     image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=700&q=80"
@@ -25,7 +26,7 @@ const starterItems = [
   {
     id: crypto.randomUUID(),
     name: "Papas Crispy",
-    price: 12.5,
+    price: 250,
     category: "Combos",
     description: "Papas crocantes con sal fina y salsa de la casa.",
     image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=700&q=80"
@@ -33,7 +34,7 @@ const starterItems = [
   {
     id: crypto.randomUUID(),
     name: "Soda Helada",
-    price: 8,
+    price: 250,
     category: "Bebidas",
     description: "Bebida refrescante servida bien fria.",
     image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=700&q=80"
@@ -74,6 +75,13 @@ const loginForm = document.querySelector("#loginForm");
 const loginError = document.querySelector("#loginError");
 const adminUser = document.querySelector("#adminUser");
 const adminPassword = document.querySelector("#adminPassword");
+const adminContent = document.querySelector("#adminContent");
+const showProductsAdmin = document.querySelector("#showProductsAdmin");
+const showOrdersAdmin = document.querySelector("#showOrdersAdmin");
+const productsAdminView = document.querySelector("#productsAdminView");
+const ordersAdminView = document.querySelector("#ordersAdminView");
+const ordersList = document.querySelector("#ordersList");
+const ordersEmpty = document.querySelector("#ordersEmpty");
 const adminForm = document.querySelector("#adminForm");
 const logoutAdmin = document.querySelector("#logoutAdmin");
 const clearMenu = document.querySelector("#clearMenu");
@@ -97,10 +105,12 @@ let selectedProductId = null;
 let isAdminLoggedIn = sessionStorage.getItem(AUTH_KEY) === "true";
 let items = loadItems();
 let cart = loadCart();
+let orders = loadOrders();
 
 renderMenu();
 renderCart();
 renderAdminState();
+renderOrders();
 updatePreview();
 
 tabs.forEach((tab) => {
@@ -177,6 +187,7 @@ confirmOrder.addEventListener("click", () => {
   }
 
   cartWarning.hidden = true;
+  saveConfirmedOrder();
   paymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(PAYMENT_LINK)}`;
   paymentLink.href = PAYMENT_LINK;
   openDialog(qrModal);
@@ -217,16 +228,39 @@ loginForm.addEventListener("submit", (event) => {
   }
 
   isAdminLoggedIn = true;
+
   sessionStorage.setItem(AUTH_KEY, "true");
-  loginForm.reset();
+
   loginError.hidden = true;
+
+  // OCULTAR FORMULARIO
+  loginForm.style.display = "none";
+
+  // MOSTRAR PANEL ADMIN
+  adminContent.style.display = "grid";
+  adminContent.hidden = false;
+
   renderAdminState();
   renderMenu();
+  renderOrders();
+
+  loginForm.reset();
+
   nameInput.focus();
 });
 
+showProductsAdmin.addEventListener("click", () => setAdminView("products"));
+showOrdersAdmin.addEventListener("click", () => setAdminView("orders"));
+
 [nameInput, priceInput, descriptionInput, imageUrl].forEach((field) => {
   field.addEventListener("input", updatePreview);
+});
+
+categoryInput.addEventListener("change", () => {
+  if (categoryInput.value === "Hamburguesas") {
+    priceInput.value = 250;
+  }
+  updatePreview();
 });
 
 imageFile.addEventListener("change", async () => {
@@ -248,14 +282,14 @@ adminForm.addEventListener("submit", (event) => {
 
   const editingItem = items.find((item) => item.id === editingItemId);
   const image = currentImageData || imageUrl.value.trim() || editingItem?.image || fallbackImage();
-  const foodItem = {
+  const foodItem = normalizeItemPrice({
     id: editingItemId || crypto.randomUUID(),
     name: nameInput.value.trim(),
     price: Number(priceInput.value),
     category: categoryInput.value,
     description: descriptionInput.value.trim(),
     image
-  };
+  });
 
   if (editingItemId) {
     items = items.map((item) => item.id === editingItemId ? foodItem : item);
@@ -322,12 +356,22 @@ menuGrid.addEventListener("click", (event) => {
 function loadItems() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (Array.isArray(stored) && stored.length) return stored;
+    if (Array.isArray(stored) && stored.length) {
+      const normalized = stored.map(normalizeItemPrice);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      return normalized;
+    }
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
 
   return [...starterItems];
+}
+
+function normalizeItemPrice(item) {
+  return item.category === "Hamburguesas"
+    ? { ...item, price: 250 }
+    : item;
 }
 
 function saveItems() {
@@ -349,6 +393,21 @@ function saveCart() {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
+function loadOrders() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ORDERS_KEY));
+    if (Array.isArray(stored)) return stored;
+  } catch {
+    localStorage.removeItem(ORDERS_KEY);
+  }
+
+  return [];
+}
+
+function saveOrders() {
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+}
+
 function renderMenu() {
   const visibleItems = activeCategory === "Todos"
     ? items
@@ -365,7 +424,7 @@ function renderMenu() {
           <p>${escapeHtml(item.description)}</p>
         </div>
         <div class="card-footer">
-          <span class="price">Bs ${formatPrice(item.price)}</span>
+          <span class="price">$${formatPrice(item.price)}</span>
           <span class="pill">${escapeHtml(item.category)}</span>
         </div>
         <div class="customer-card-actions" aria-label="Acciones del producto">
@@ -392,13 +451,14 @@ function updatePreview() {
   previewImage.src = image;
   previewName.textContent = nameInput.value.trim() || "Vista previa";
   previewDescription.textContent = descriptionInput.value.trim() || "Completa los datos para ver como se vera en el menu.";
-  previewPrice.textContent = `Bs ${formatPrice(Number(priceInput.value || 0))}`;
+  previewPrice.textContent = `$${formatPrice(Number(priceInput.value || 0))}`;
 }
 
 function resetForm() {
   adminForm.reset();
   currentImageData = "";
   editingItemId = null;
+  priceInput.value = 250;
   adminPanelTitle.textContent = isAdminLoggedIn ? "Agregar comida" : "Iniciar sesion";
   saveFood.textContent = "Agregar producto";
   cancelEdit.hidden = true;
@@ -406,17 +466,31 @@ function resetForm() {
 }
 
 function renderAdminState() {
-  loginForm.hidden = isAdminLoggedIn;
-  adminForm.hidden = !isAdminLoggedIn;
+  loginForm.style.display = isAdminLoggedIn ? "none" : "grid";
+adminContent.style.display = isAdminLoggedIn ? "grid" : "none";
   adminPanelTitle.textContent = isAdminLoggedIn
     ? (editingItemId ? "Editar comida" : "Agregar comida")
     : "Iniciar sesion";
+  if (isAdminLoggedIn) setAdminView("products");
+}
+
+function setAdminView(view) {
+  const showingOrders = view === "orders";
+  showProductsAdmin.classList.toggle("is-active", !showingOrders);
+  showOrdersAdmin.classList.toggle("is-active", showingOrders);
+  productsAdminView.classList.toggle("is-active", !showingOrders);
+  ordersAdminView.classList.toggle("is-active", showingOrders);
+  adminPanelTitle.textContent = showingOrders
+    ? "Pedidos confirmados"
+    : (editingItemId ? "Editar comida" : "Agregar comida");
+  if (showingOrders) renderOrders();
 }
 
 function startEdit(id) {
   const item = items.find((food) => food.id === id);
   if (!item) return;
 
+  setAdminView("products");
   editingItemId = id;
   nameInput.value = item.name;
   priceInput.value = item.price;
@@ -461,7 +535,7 @@ function showProduct(id) {
   detailCategory.textContent = item.category;
   detailName.textContent = item.name;
   detailDescription.textContent = item.description;
-  detailPrice.textContent = `Bs ${formatPrice(item.price)}`;
+  detailPrice.textContent = `$${formatPrice(item.price)}`;
   openDialog(productModal);
 }
 
@@ -500,7 +574,7 @@ function renderCart() {
       <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}">
       <div class="cart-row-info">
         <strong>${escapeHtml(item.name)}</strong>
-        <span>Bs ${formatPrice(item.price)} c/u</span>
+        <span>$${formatPrice(item.price)} c/u</span>
         <div class="quantity-control" aria-label="Cantidad de ${escapeAttribute(item.name)}">
           <button type="button" data-cart-action="decrease" data-id="${escapeAttribute(item.id)}" aria-label="Restar ${escapeAttribute(item.name)}">-</button>
           <output>${item.quantity}</output>
@@ -508,14 +582,14 @@ function renderCart() {
         </div>
       </div>
       <div class="cart-row-total">
-        <b>Bs ${formatPrice(item.price * item.quantity)}</b>
+        <b>$${formatPrice(item.price * item.quantity)}</b>
         <button class="remove-cart-item" type="button" data-cart-action="remove" data-id="${escapeAttribute(item.id)}">Eliminar</button>
       </div>
     </article>
   `).join("");
 
   const total = cartRows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cartTotal.textContent = `Bs ${formatPrice(total)}`;
+  cartTotal.textContent = `$${formatPrice(total)}`;
 }
 
 function changeCartQuantity(id, amount) {
@@ -536,6 +610,75 @@ function removeFromCart(id) {
   cart = cart.filter((entry) => entry.id !== id);
   saveCart();
   renderCart();
+}
+
+function saveConfirmedOrder() {
+  const orderItems = cart
+    .map((entry) => {
+      const item = items.find((food) => food.id === entry.id);
+      if (!item) return null;
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: entry.quantity,
+        image: item.image
+      };
+    })
+    .filter(Boolean);
+
+  if (!orderItems.length) return;
+
+  const total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const order = {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    items: orderItems,
+    total
+  };
+
+  orders = [order, ...orders];
+  saveOrders();
+  cart = [];
+  saveCart();
+  renderCart();
+  renderOrders();
+}
+
+function renderOrders() {
+  if (!ordersList || !ordersEmpty) return;
+
+  ordersEmpty.hidden = orders.length > 0;
+  ordersList.hidden = orders.length === 0;
+  ordersList.innerHTML = orders.map((order, index) => `
+    <article class="order-card">
+      <div class="order-card-header">
+        <div>
+          <strong>Pedido #${orders.length - index}</strong>
+          <span>${formatOrderDate(order.createdAt)}</span>
+        </div>
+        <b>$${formatPrice(order.total)}</b>
+      </div>
+      <div class="order-items">
+        ${order.items.map((item) => `
+          <div class="order-item">
+            <span>${escapeHtml(item.name)}</span>
+            <small>${item.quantity} x $${formatPrice(item.price)}</small>
+          </div>
+        `).join("")}
+      </div>
+    </article>
+  `).join("");
+}
+
+function formatOrderDate(value) {
+  return new Intl.DateTimeFormat("es", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 }
 
 function openDialog(dialog) {
@@ -561,7 +704,8 @@ function fallbackImage() {
 }
 
 function formatPrice(value) {
-  return Number(value || 0).toFixed(2);
+  const number = Number(value || 0);
+  return Number.isInteger(number) ? String(number) : number.toFixed(2);
 }
 
 function escapeHtml(value) {
