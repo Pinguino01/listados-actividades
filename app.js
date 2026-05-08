@@ -1,337 +1,353 @@
-// ===============================
-// FIREBASE IMPORTS
-// ===============================
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getFirestore,
   collection,
   addDoc,
+  onSnapshot,
   updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ===============================
-// FIREBASE CONFIG
-// ===============================
+/* =========================
+FIREBASE
+========================= */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCAHJvADlZAXkB5OTywm_Hn9t1sGo9acn0",
-  authDomain: "menu-interactivo-913fa.firebaseapp.com",
-  projectId: "menu-interactivo-913fa",
-  storageBucket: "menu-interactivo-913fa.appspot.com",
-  messagingSenderId: "173342971594",
-  appId: "1:173342971594:web:dd275dbb131e3f5d98c633"
+
+  apiKey: "TU_API_KEY",
+
+  authDomain: "TU_AUTH_DOMAIN",
+
+  projectId: "TU_PROJECT_ID",
+
+  storageBucket: "TU_STORAGE_BUCKET",
+
+  messagingSenderId: "TU_SENDER_ID",
+
+  appId: "TU_APP_ID"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
-// ===============================
-// CONFIG
-// ===============================
-
-const CART_KEY = "burger-house-cart";
+/* =========================
+CONFIG
+========================= */
 
 const ADMIN_USER = "admin";
+
 const ADMIN_PASSWORD = "admin123";
 
-const PAYMENT_LINK =
-  "https://apps.apple.com/do/app/coopesa-personal/id6760831661";
+/* =========================
+DOM
+========================= */
 
-// ===============================
-// DOM
-// ===============================
+const menuGrid =
+  document.querySelector("#menuGrid");
 
-const menuGrid = document.querySelector("#menuGrid");
-const itemCount = document.querySelector("#itemCount");
-const emptyState = document.querySelector("#emptyState");
+const itemCount =
+  document.querySelector("#itemCount");
 
-const tabsContainer = document.querySelector("#tabsContainer");
+const emptyState =
+  document.querySelector("#emptyState");
 
-const cartEntry = document.querySelector("#cartEntry");
-const cartModal = document.querySelector("#cartModal");
-const closeCart = document.querySelector("#closeCart");
+const tabsContainer =
+  document.querySelector("#tabsContainer");
 
-const cartCount = document.querySelector("#cartCount");
-const cartItems = document.querySelector("#cartItems");
-const cartTotal = document.querySelector("#cartTotal");
-const cartEmpty = document.querySelector("#cartEmpty");
-const cartWarning = document.querySelector("#cartWarning");
+const cartEntry =
+  document.querySelector("#cartEntry");
 
-const confirmOrder = document.querySelector("#confirmOrder");
+const cartModal =
+  document.querySelector("#cartModal");
 
-const qrModal = document.querySelector("#qrModal");
-const closeQr = document.querySelector("#closeQr");
-const paymentQr = document.querySelector("#paymentQr");
-const paymentLink = document.querySelector("#paymentLink");
+const closeCart =
+  document.querySelector("#closeCart");
 
-const adminEntry = document.querySelector("#adminEntry");
-const adminModal = document.querySelector("#adminModal");
-const closeAdmin = document.querySelector("#closeAdmin");
+const cartItems =
+  document.querySelector("#cartItems");
 
-const loginForm = document.querySelector("#loginForm");
-const loginError = document.querySelector("#loginError");
-const adminUser = document.querySelector("#adminUser");
-const adminPassword = document.querySelector("#adminPassword");
-const adminContent = document.querySelector("#adminContent");
+const cartTotal =
+  document.querySelector("#cartTotal");
 
-const logoutAdmin = document.querySelector("#logoutAdmin");
+const cartCount =
+  document.querySelector("#cartCount");
 
-const adminForm = document.querySelector("#adminForm");
+const confirmOrder =
+  document.querySelector("#confirmOrder");
 
-const nameInput = document.querySelector("#foodName");
-const priceInput = document.querySelector("#foodPrice");
-const descriptionInput = document.querySelector("#foodDescription");
-const imageUrl = document.querySelector("#foodImageUrl");
+const cartEmpty =
+  document.querySelector("#cartEmpty");
 
-const categoryInput = document.querySelector("#foodCategory");
+const adminEntry =
+  document.querySelector("#adminEntry");
 
-const newCategoryInput = document.querySelector("#newCategoryInput");
-const addCategoryButton = document.querySelector("#addCategoryButton");
+const adminModal =
+  document.querySelector("#adminModal");
 
-const ordersList = document.querySelector("#ordersList");
-const ordersEmpty = document.querySelector("#ordersEmpty");
+const closeAdmin =
+  document.querySelector("#closeAdmin");
 
-const productModal = document.querySelector("#productModal");
-const closeProduct = document.querySelector("#closeProduct");
+const loginForm =
+  document.querySelector("#loginForm");
 
-const detailImage = document.querySelector("#detailImage");
-const detailCategory = document.querySelector("#detailCategory");
-const detailName = document.querySelector("#detailName");
-const detailDescription = document.querySelector("#detailDescription");
-const detailPrice = document.querySelector("#detailPrice");
-const detailAddCart = document.querySelector("#detailAddCart");
+const adminUser =
+  document.querySelector("#adminUser");
 
-// ===============================
-// STATE
-// ===============================
+const adminPassword =
+  document.querySelector("#adminPassword");
+
+const loginError =
+  document.querySelector("#loginError");
+
+const adminContent =
+  document.querySelector("#adminContent");
+
+const logoutAdmin =
+  document.querySelector("#logoutAdmin");
+
+const categoryInput =
+  document.querySelector("#foodCategory");
+
+const newCategoryInput =
+  document.querySelector("#newCategoryInput");
+
+const addCategoryButton =
+  document.querySelector("#addCategoryButton");
+
+const adminForm =
+  document.querySelector("#adminForm");
+
+const nameInput =
+  document.querySelector("#foodName");
+
+const priceInput =
+  document.querySelector("#foodPrice");
+
+const imageUrl =
+  document.querySelector("#foodImageUrl");
+
+const descriptionInput =
+  document.querySelector("#foodDescription");
+
+const ordersList =
+  document.querySelector("#ordersList");
+
+const ordersEmpty =
+  document.querySelector("#ordersEmpty");
+
+/* =========================
+STATE
+========================= */
+
+let items = [];
+
+let categories = [];
+
+let orders = [];
+
+let cart = [];
 
 let activeCategory = "Todos";
 
-let items = [];
-let orders = [];
-let categories = [];
+/* =========================
+FIREBASE LISTENERS
+========================= */
 
-let selectedProductId = null;
+onSnapshot(
+  collection(db, "products"),
+  (snapshot) => {
 
-let cart = loadCart();
-
-// ===============================
-// FIREBASE LISTENERS
-// ===============================
-
-function listenProducts() {
-
-  onSnapshot(collection(db, "products"), (snapshot) => {
-
-    items = snapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data()
+    items = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
     }));
 
     renderMenu();
     renderCart();
 
-  });
+  }
+);
 
-}
+onSnapshot(
+  collection(db, "categories"),
+  (snapshot) => {
 
-function listenOrders() {
-
-  onSnapshot(collection(db, "orders"), (snapshot) => {
-
-    orders = snapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data()
-    }));
-
-    renderOrders();
-
-  });
-
-}
-
-function listenCategories() {
-
-  onSnapshot(collection(db, "categories"), (snapshot) => {
-
-    categories = snapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data()
+    categories = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
     }));
 
     renderCategories();
 
-  });
+  }
+);
 
-}
+onSnapshot(
+  collection(db, "orders"),
+  (snapshot) => {
 
-// ===============================
-// INIT
-// ===============================
+    orders = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-listenProducts();
-listenOrders();
-listenCategories();
+    renderOrders();
 
-renderCart();
+  }
+);
 
-// ===============================
-// CATEGORIES
-// ===============================
+/* =========================
+RENDER CATEGORIES
+========================= */
 
 function renderCategories() {
 
-  categoryInput.innerHTML = categories
-    .map((category) => `
-      <option value="${escapeAttribute(category.name)}">
-        ${escapeHtml(category.name)}
+  categoryInput.innerHTML =
+    categories.map((category) => `
+      <option>
+        ${category.name}
       </option>
-    `)
-    .join("");
-
-  renderCategoryTabs();
-
-}
-
-function renderCategoryTabs() {
+    `).join("");
 
   const allCategories = [
     "Todos",
-    ...categories.map((category) => category.name)
+    ...categories.map(
+      (category) => category.name
+    )
   ];
 
-  tabsContainer.innerHTML = allCategories
-    .map((category) => `
-
+  tabsContainer.innerHTML =
+    allCategories.map((category) => `
       <button
-        class="tab ${activeCategory === category ? "is-active" : ""}"
-        data-category="${escapeAttribute(category)}"
+        class="tab ${activeCategory === category ? "active" : ""}"
+        data-category="${category}"
       >
-        ${escapeHtml(category)}
+        ${category}
       </button>
-
-    `)
-    .join("");
+    `).join("");
 
   tabsContainer
     .querySelectorAll(".tab")
-    .forEach((tab) => {
+    .forEach((button) => {
 
-      tab.addEventListener("click", () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-        activeCategory = tab.dataset.category;
+          activeCategory =
+            button.dataset.category;
 
-        renderCategoryTabs();
-        renderMenu();
+          renderCategories();
+          renderMenu();
 
-      });
+        }
+      );
 
     });
 
 }
 
-addCategoryButton?.addEventListener("click", async () => {
+/* =========================
+ADD CATEGORY
+========================= */
 
-  const categoryName = newCategoryInput.value.trim();
+addCategoryButton.addEventListener(
+  "click",
+  async () => {
 
-  if (!categoryName) return;
+    const name =
+      newCategoryInput.value.trim();
 
-  const exists = categories.some(
-    (category) =>
-      category.name.toLowerCase() ===
-      categoryName.toLowerCase()
-  );
+    if (!name) return;
 
-  if (exists) {
+    await addDoc(
+      collection(db, "categories"),
+      {
+        name
+      }
+    );
 
-    alert("La categoria ya existe");
-    return;
+    newCategoryInput.value = "";
 
   }
+);
 
-  await addDoc(collection(db, "categories"), {
-    name: categoryName
-  });
+/* =========================
+SAVE PRODUCT
+========================= */
 
-  newCategoryInput.value = "";
+adminForm.addEventListener(
+  "submit",
+  async (event) => {
 
-});
+    event.preventDefault();
 
-// ===============================
-// SAVE PRODUCT
-// ===============================
+    await addDoc(
+      collection(db, "products"),
+      {
 
-adminForm?.addEventListener("submit", async (event) => {
+        name:
+          nameInput.value.trim(),
 
-  event.preventDefault();
+        price:
+          Number(priceInput.value),
 
-  const product = {
-    name: nameInput.value.trim(),
-    price: Number(priceInput.value),
-    category: categoryInput.value,
-    description: descriptionInput.value.trim(),
-    image: imageUrl.value.trim()
-  };
+        category:
+          categoryInput.value,
 
-  await addDoc(collection(db, "products"), product);
+        image:
+          imageUrl.value.trim(),
 
-  adminForm.reset();
+        description:
+          descriptionInput.value.trim()
 
-});
+      }
+    );
 
-// ===============================
-// MENU
-// ===============================
+    adminForm.reset();
+
+  }
+);
+
+/* =========================
+MENU
+========================= */
 
 function renderMenu() {
 
-  const visibleItems = activeCategory === "Todos"
-    ? items
-    : items.filter(
-        (item) => item.category === activeCategory
-      );
+  const visibleItems =
+    activeCategory === "Todos"
+      ? items
+      : items.filter(
+          (item) =>
+            item.category === activeCategory
+        );
 
-  menuGrid.innerHTML = visibleItems
-    .map((item) => `
-
+  menuGrid.innerHTML =
+    visibleItems.map((item) => `
       <article class="menu-card">
 
-        <img
-          src="${escapeAttribute(item.image)}"
-          alt="${escapeAttribute(item.name)}"
-        >
+        <img src="${item.image}">
 
         <h3>
-          ${escapeHtml(item.name)}
+          ${item.name}
         </h3>
 
         <p>
-          ${escapeHtml(item.description)}
+          ${item.description}
         </p>
 
         <div class="card-footer">
 
-          <span>
-            $${formatPrice(item.price)}
-          </span>
-
-        </div>
-
-        <div class="card-actions">
+          <strong>
+            $${item.price}
+          </strong>
 
           <button
-            data-view-product="${item.id}"
-          >
-            Ver
-          </button>
-
-          <button
-            data-add-cart="${item.id}"
+            data-cart="${item.id}"
           >
             Añadir
           </button>
@@ -339,9 +355,7 @@ function renderMenu() {
         </div>
 
       </article>
-
-    `)
-    .join("");
+    `).join("");
 
   itemCount.textContent =
     `${visibleItems.length} productos`;
@@ -351,552 +365,354 @@ function renderMenu() {
 
 }
 
-// ===============================
-// PRODUCT MODAL
-// ===============================
+/* =========================
+ADD CART
+========================= */
 
-function showProduct(id) {
+menuGrid.addEventListener(
+  "click",
+  (event) => {
 
-  const item = items.find(
-    (food) => food.id === id
-  );
+    const button =
+      event.target.closest("[data-cart]");
 
-  if (!item) return;
+    if (!button) return;
 
-  selectedProductId = id;
+    const id =
+      button.dataset.cart;
 
-  detailImage.src = item.image;
+    const existing =
+      cart.find((item) => item.id === id);
 
-  detailCategory.textContent =
-    item.category;
+    if (existing) {
 
-  detailName.textContent =
-    item.name;
+      existing.quantity++;
 
-  detailDescription.textContent =
-    item.description;
+    } else {
 
-  detailPrice.textContent =
-    `$${formatPrice(item.price)}`;
+      cart.push({
+        id,
+        quantity: 1
+      });
 
-  openDialog(productModal);
+    }
 
-}
-
-// ===============================
-// MENU ACTIONS
-// ===============================
-
-menuGrid.addEventListener("click", (event) => {
-
-  const addButton =
-    event.target.closest("[data-add-cart]");
-
-  const viewButton =
-    event.target.closest("[data-view-product]");
-
-  if (addButton) {
-
-    addToCart(addButton.dataset.addCart);
-
-    return;
+    renderCart();
 
   }
+);
 
-  if (viewButton) {
-
-    showProduct(viewButton.dataset.viewProduct);
-
-  }
-
-});
-
-// ===============================
-// CART
-// ===============================
-
-function addToCart(id) {
-
-  const existing = cart.find(
-    (item) => item.id === id
-  );
-
-  if (existing) {
-
-    existing.quantity += 1;
-
-  } else {
-
-    cart.push({
-      id,
-      quantity: 1
-    });
-
-  }
-
-  saveCart();
-  renderCart();
-
-}
+/* =========================
+RENDER CART
+========================= */
 
 function renderCart() {
 
-  const cartRows = cart
-    .map((entry) => {
+  const cartRows = cart.map((entry) => {
 
-      const item = items.find(
-        (food) => food.id === entry.id
+    const product =
+      items.find(
+        (item) => item.id === entry.id
       );
 
-      if (!item) return null;
+    return {
+      ...product,
+      quantity: entry.quantity
+    };
 
-      return {
-        ...item,
-        quantity: entry.quantity
-      };
+  });
 
-    })
-    .filter(Boolean);
-
-  cartItems.innerHTML = cartRows
-    .map((item) => `
-
+  cartItems.innerHTML =
+    cartRows.map((item) => `
       <div class="cart-row">
 
         <strong>
-          ${escapeHtml(item.name)}
+          ${item.name}
         </strong>
 
         <span>
-          ${item.quantity} x $${formatPrice(item.price)}
+          ${item.quantity} x $${item.price}
         </span>
 
       </div>
-
-    `)
-    .join("");
+    `).join("");
 
   cartEmpty.hidden =
     cartRows.length > 0;
 
-  cartCount.textContent = cartRows.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-
-  const total = cartRows.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  );
+  const total =
+    cartRows.reduce(
+      (sum, item) =>
+        sum + item.price * item.quantity,
+      0
+    );
 
   cartTotal.textContent =
-    `$${formatPrice(total)}`;
+    `$${total}`;
+
+  cartCount.textContent =
+    cartRows.reduce(
+      (sum, item) =>
+        sum + item.quantity,
+      0
+    );
 
 }
 
-// ===============================
-// SAVE ORDER
-// ===============================
+/* =========================
+CONFIRM ORDER
+========================= */
 
-async function saveConfirmedOrder() {
+confirmOrder.addEventListener(
+  "click",
+  async () => {
 
-  const orderItems = cart
-    .map((entry) => {
+    if (!cart.length) return;
 
-      const item = items.find(
-        (food) => food.id === entry.id
-      );
+    const orderItems = cart.map((entry) => {
 
-      if (!item) return null;
+      const item =
+        items.find(
+          (product) =>
+            product.id === entry.id
+        );
 
       return {
+
         id: item.id,
+
         name: item.name,
+
         price: item.price,
+
         quantity: entry.quantity
+
       };
 
-    })
-    .filter(Boolean);
+    });
 
-  if (!orderItems.length) return;
+    const total =
+      orderItems.reduce(
+        (sum, item) =>
+          sum + item.price * item.quantity,
+        0
+      );
 
-  const total = orderItems.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  );
+    await addDoc(
+      collection(db, "orders"),
+      {
 
-  await addDoc(collection(db, "orders"), {
-    createdAt: new Date().toISOString(),
-    items: orderItems,
-    total,
-    status: "Pendiente"
-  });
+        createdAt:
+          new Date().toISOString(),
 
-  cart = [];
+        status: "Pendiente",
 
-  saveCart();
-  renderCart();
+        items: orderItems,
 
-}
+        total
 
-// ===============================
-// ORDERS
-// ===============================
+      }
+    );
+
+    cart = [];
+
+    renderCart();
+
+  }
+);
+
+/* =========================
+RENDER ORDERS
+========================= */
 
 function renderOrders() {
 
   ordersEmpty.hidden =
     orders.length > 0;
 
-  ordersList.innerHTML = orders
-    .map((order, index) => `
+  ordersList.innerHTML =
+    orders.map((order) => `
+      <div class="order-card">
 
-      <article
-        class="order-card status-${order.status.toLowerCase()}"
-      >
+        <div class="order-top">
 
-        <div class="order-card-header">
+          <strong>
+            ${order.status}
+          </strong>
 
-          <div>
-
-            <strong>
-              Pedido #${orders.length - index}
-            </strong>
-
-            <span>
-              ${formatOrderDate(order.createdAt)}
-            </span>
-
-          </div>
-
-          <div>
-
-            <b>
-              $${formatPrice(order.total)}
-            </b>
-
-            <span class="order-status">
-              ${escapeHtml(order.status)}
-            </span>
-
-          </div>
-
-        </div>
-
-        <div class="order-items">
-
-          ${order.items
-            .map((item) => `
-
-              <div class="order-item">
-
-                <span>
-                  ${escapeHtml(item.name)}
-                </span>
-
-                <small>
-                  ${item.quantity}
-                  x
-                  $${formatPrice(item.price)}
-                </small>
-
-              </div>
-
-            `)
-            .join("")}
+          <span>
+            $${order.total}
+          </span>
 
         </div>
 
         <div class="order-actions">
 
           <button
-            class="complete-order"
-            data-complete-order="${order.id}"
+            data-complete="${order.id}"
           >
             Completar
           </button>
 
           <button
-            class="cancel-order"
-            data-cancel-order="${order.id}"
+            data-cancel="${order.id}"
           >
             Cancelar
           </button>
 
         </div>
 
-      </article>
-
-    `)
-    .join("");
+      </div>
+    `).join("");
 
 }
 
-ordersList?.addEventListener("click", async (event) => {
+/* =========================
+ORDER ACTIONS
+========================= */
 
-  const completeButton =
-    event.target.closest("[data-complete-order]");
+ordersList.addEventListener(
+  "click",
+  async (event) => {
 
-  const cancelButton =
-    event.target.closest("[data-cancel-order]");
+    const complete =
+      event.target.closest("[data-complete]");
 
-  if (completeButton) {
+    const cancel =
+      event.target.closest("[data-cancel]");
 
-    await updateDoc(
-      doc(db, "orders", completeButton.dataset.completeOrder),
-      {
-        status: "Completado"
-      }
-    );
+    if (complete) {
 
-  }
+      await updateDoc(
+        doc(
+          db,
+          "orders",
+          complete.dataset.complete
+        ),
+        {
+          status: "Completado"
+        }
+      );
 
-  if (cancelButton) {
-
-    await updateDoc(
-      doc(db, "orders", cancelButton.dataset.cancelOrder),
-      {
-        status: "Cancelado"
-      }
-    );
-
-  }
-
-});
-
-// ===============================
-// STORAGE
-// ===============================
-
-function loadCart() {
-
-  try {
-
-    const stored = JSON.parse(
-      localStorage.getItem(CART_KEY)
-    );
-
-    if (Array.isArray(stored)) {
-      return stored;
     }
 
-  } catch {
+    if (cancel) {
 
-    localStorage.removeItem(CART_KEY);
+      await updateDoc(
+        doc(
+          db,
+          "orders",
+          cancel.dataset.cancel
+        ),
+        {
+          status: "Cancelado"
+        }
+      );
+
+    }
 
   }
+);
 
-  return [];
-
-}
-
-function saveCart() {
-
-  localStorage.setItem(
-    CART_KEY,
-    JSON.stringify(cart)
-  );
-
-}
-
-// ===============================
-// HELPERS
-// ===============================
+/* =========================
+MODALS
+========================= */
 
 function openDialog(dialog) {
 
-  if (!dialog) return;
-
-  if (typeof dialog.showModal === "function") {
-
-    dialog.showModal();
-
-  } else {
-
-    dialog.setAttribute("open", "");
-
-  }
+  dialog.showModal();
 
 }
 
 function closeDialog(dialog) {
 
-  if (!dialog) return;
-
   dialog.close();
 
 }
 
-function formatPrice(value) {
+/* =========================
+CART
+========================= */
 
-  const number = Number(value || 0);
+cartEntry.addEventListener(
+  "click",
+  () => {
 
-  return Number.isInteger(number)
-    ? String(number)
-    : number.toFixed(2);
-
-}
-
-function formatOrderDate(value) {
-
-  return new Intl.DateTimeFormat("es", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
-
-}
-
-function escapeHtml(value) {
-
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-function escapeAttribute(value) {
-
-  return escapeHtml(value)
-    .replaceAll("`", "&#096;");
-
-}
-
-// ===============================
-// MODALS
-// ===============================
-
-adminEntry?.addEventListener("click", () => {
-
-  openDialog(adminModal);
-
-});
-
-closeAdmin?.addEventListener("click", () => {
-
-  closeDialog(adminModal);
-
-});
-
-cartEntry?.addEventListener("click", () => {
-
-  renderCart();
-
-  openDialog(cartModal);
-
-});
-
-closeCart?.addEventListener("click", () => {
-
-  closeDialog(cartModal);
-
-});
-
-closeProduct?.addEventListener("click", () => {
-
-  closeDialog(productModal);
-
-});
-
-closeQr?.addEventListener("click", () => {
-
-  closeDialog(qrModal);
-
-});
-
-// ===============================
-// LOGIN
-// ===============================
-
-loginForm?.addEventListener("submit", (event) => {
-
-  event.preventDefault();
-
-  const username =
-    adminUser.value.trim();
-
-  const password =
-    adminPassword.value.trim();
-
-  if (
-    username === ADMIN_USER &&
-    password === ADMIN_PASSWORD
-  ) {
-
-    loginError.hidden = true;
-
-    loginForm.hidden = true;
-
-    adminContent.hidden = false;
-
-  } else {
-
-    loginError.hidden = false;
+    openDialog(cartModal);
 
   }
+);
 
-});
+closeCart.addEventListener(
+  "click",
+  () => {
 
-// ===============================
-// LOGOUT
-// ===============================
-
-logoutAdmin?.addEventListener("click", () => {
-
-  adminContent.hidden = true;
-
-  loginForm.hidden = false;
-
-  loginForm.reset();
-
-});
-
-// ===============================
-// PRODUCT DETAIL CART
-// ===============================
-
-detailAddCart?.addEventListener("click", () => {
-
-  if (!selectedProductId) return;
-
-  addToCart(selectedProductId);
-
-  closeDialog(productModal);
-
-});
-
-// ===============================
-// CONFIRM ORDER
-// ===============================
-
-confirmOrder?.addEventListener("click", async () => {
-
-  if (!cart.length) {
-
-    cartWarning.hidden = false;
-
-    return;
+    closeDialog(cartModal);
 
   }
+);
 
-  cartWarning.hidden = true;
+/* =========================
+ADMIN
+========================= */
 
-  await saveConfirmedOrder();
+adminEntry.addEventListener(
+  "click",
+  () => {
 
-  paymentQr.src =
-    "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" +
-    encodeURIComponent(PAYMENT_LINK);
+    openDialog(adminModal);
 
-  paymentLink.href = PAYMENT_LINK;
+  }
+);
 
-  openDialog(qrModal);
+closeAdmin.addEventListener(
+  "click",
+  () => {
 
-});
+    closeDialog(adminModal);
+
+  }
+);
+
+/* =========================
+LOGIN
+========================= */
+
+loginForm.addEventListener(
+  "submit",
+  (event) => {
+
+    event.preventDefault();
+
+    if (
+      adminUser.value === ADMIN_USER &&
+      adminPassword.value === ADMIN_PASSWORD
+    ) {
+
+      loginForm.style.display = "none";
+
+      adminContent.hidden = false;
+
+    } else {
+
+      loginError.hidden = false;
+
+    }
+
+  }
+);
+
+/* =========================
+LOGOUT
+========================= */
+
+logoutAdmin.addEventListener(
+  "click",
+  () => {
+
+    adminContent.hidden = true;
+
+    loginForm.style.display = "grid";
+
+  }
+);
