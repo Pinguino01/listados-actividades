@@ -842,3 +842,212 @@ categories
   items: []
 }
 ```
+
+// =========================
+// MODALES
+// =========================
+
+function openDialog(dialog) {
+
+  if (!dialog) return;
+
+  if (typeof dialog.showModal === "function") {
+
+    dialog.showModal();
+
+  } else {
+
+    dialog.setAttribute("open", "");
+
+  }
+
+}
+
+function closeDialog(dialog) {
+
+  if (!dialog) return;
+
+  dialog.close();
+
+}
+
+// =========================
+// ADMIN
+// =========================
+
+adminEntry?.addEventListener("click", () => {
+
+  openDialog(adminModal);
+
+});
+
+closeAdmin?.addEventListener("click", () => {
+
+  closeDialog(adminModal);
+
+});
+
+adminModal?.addEventListener("click", (event) => {
+
+  if (event.target === adminModal) {
+
+    closeDialog(adminModal);
+
+  }
+
+});
+
+// =========================
+// CARRITO
+// =========================
+
+cartEntry?.addEventListener("click", () => {
+
+  renderCart();
+
+  openDialog(cartModal);
+
+});
+
+closeCart?.addEventListener("click", () => {
+
+  closeDialog(cartModal);
+
+});
+
+cartModal?.addEventListener("click", (event) => {
+
+  if (event.target === cartModal) {
+
+    closeDialog(cartModal);
+
+  }
+
+});
+
+// =========================
+// PRODUCTO
+// =========================
+
+closeProduct?.addEventListener("click", () => {
+
+  closeDialog(productModal);
+
+});
+
+productModal?.addEventListener("click", (event) => {
+
+  if (event.target === productModal) {
+
+    closeDialog(productModal);
+
+  }
+
+});
+
+// =========================
+// QR
+// =========================
+
+closeQr?.addEventListener("click", () => {
+
+  closeDialog(qrModal);
+
+});
+
+qrModal?.addEventListener("click", (event) => {
+
+  if (event.target === qrModal) {
+
+    closeDialog(qrModal);
+
+  }
+
+});
+
+// =========================
+// LOGIN ADMIN
+// =========================
+
+loginForm?.addEventListener("submit", (event) => {
+
+  event.preventDefault();
+
+  const username = adminUser.value.trim();
+
+  const password = adminPassword.value.trim();
+
+  if (
+    username === "admin" &&
+    password === "admin123"
+  ) {
+
+    loginError.hidden = true;
+
+    loginForm.hidden = true;
+
+    adminContent.hidden = false;
+
+  } else {
+
+    loginError.hidden = false;
+
+  }
+
+});
+
+// =========================
+// LOGOUT
+// =========================
+
+logoutAdmin?.addEventListener("click", () => {
+
+  adminContent.hidden = true;
+
+  loginForm.hidden = false;
+
+  loginForm.reset();
+
+});
+
+// =========================
+// BOTON AÑADIR CARRITO
+// =========================
+
+detailAddCart?.addEventListener("click", () => {
+
+  if (!selectedProductId) return;
+
+  addToCart(selectedProductId);
+
+  closeDialog(productModal);
+
+});
+
+// =========================
+// CONFIRMAR PEDIDO
+// =========================
+
+confirmOrder?.addEventListener("click", async () => {
+
+  if (!cart.length) {
+
+    cartWarning.hidden = false;
+
+    return;
+
+  }
+
+  cartWarning.hidden = true;
+
+  await saveConfirmedOrder();
+
+  paymentQr.src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" +
+    encodeURIComponent(PAYMENT_LINK);
+
+  paymentLink.href = PAYMENT_LINK;
+
+  openDialog(qrModal);
+
+});
