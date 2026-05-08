@@ -1,15 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1"
   >
 
-  <title>Burger House</title>
+  <title>Menu Amigos Burguer</title>
+
+  <meta
+    name="theme-color"
+    content="#1e9845"
+  >
+
+  <meta
+    name="mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-title"
+    content="Amigos Burguer"
+  >
+
+  <link
+    rel="shortcut icon"
+    href="assets/app-icon.png?v=11"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="32x32"
+    href="assets/app-icon.png?v=11"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="assets/app-icon.png?v=11"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    sizes="180x180"
+    href="assets/app-icon.png?v=11"
+  >
+
+  <link
+    rel="manifest"
+    href="site.webmanifest"
+  >
 
   <link
     rel="preconnect"
@@ -27,290 +77,180 @@
     rel="stylesheet"
   >
 
-  <!-- TU CSS -->
   <link
     rel="stylesheet"
-    href="styles.css"
+    href="styles.css?v=13"
   >
 
 </head>
 
 <body>
 
-  <!-- HEADER -->
+  <!-- TOPBAR -->
 
-  <header class="site-header">
+  <header class="topbar">
 
-    <div class="header-content">
+    <a
+      class="brand"
+      href="#"
+      aria-label="Volver al menu"
+    >
+      <img
+        class="main-brand-logo"
+        src="assets/Amigos-burguer-logo.png"
+        alt="Amigos Burguer"
+      >
+    </a>
 
-      <div>
+    <div
+      class="support-brand"
+      aria-label="Con el respaldo de COOPESA"
+    >
+      <img
+        src="assets/COOPESA-HORIZONTAL-3D.png"
+        alt="COOPESA"
+      >
+    </div>
 
-        <h1 class="logo-title">
-          Burger House
-        </h1>
+    <!-- CATEGORIAS DINAMICAS -->
 
-        <p class="logo-subtitle">
-          Hamburguesas • Combos • Bebidas
-        </p>
+    <nav
+      class="category-tabs"
+      id="tabsContainer"
+      aria-label="Categorias del menu"
+    >
+    </nav>
 
-      </div>
+    <div class="top-actions">
 
-      <!-- BOTON ADMIN -->
+      <!-- CARRITO -->
 
       <button
-        id="adminToggle"
-        class="admin-toggle-button"
+        class="cart-entry"
+        id="cartEntry"
         type="button"
-        aria-label="Abrir panel administrador"
+        aria-label="Ver carrito"
+        title="Carrito"
       >
-        ⚙️
+
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M6 6h15l-1.5 9h-12z"></path>
+          <path d="M6 6 5 3H2"></path>
+          <path d="M8 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+          <path d="M18 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+        </svg>
+
+        <span id="cartCount">0</span>
+
+      </button>
+
+      <!-- ADMIN -->
+
+      <button
+        class="admin-entry"
+        id="adminEntry"
+        type="button"
+        aria-label="Ingresar como administrador"
+        title="Administrador"
+      >
+
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
+          <path d="M4 21a8 8 0 0 1 16 0"></path>
+        </svg>
+
       </button>
 
     </div>
 
   </header>
 
-  <!-- LOGIN ADMIN -->
+  <!-- MAIN -->
 
-  <dialog id="adminLoginModal">
+  <main>
 
-    <form
-      id="adminLoginForm"
-      class="admin-login-form"
-    >
+    <!-- HERO -->
 
-      <h2>
-        Panel Administrador
-      </h2>
+    <section class="hero">
 
-      <input
-        type="text"
-        id="adminUsername"
-        placeholder="Usuario"
-        required
-      >
+      <div class="hero-copy">
 
-      <input
-        type="password"
-        id="adminUserPassword"
-        placeholder="Contraseña"
-        required
-      >
+        <p class="eyebrow">
+          Listo para ordenar
+        </p>
 
-      <p
-        id="adminLoginError"
-        hidden
-      >
-        Usuario o contraseña incorrectos
-      </p>
+        <h1>
+          Menu Amigos Burguer rapido, visual y facil de actualizar
+        </h1>
 
-      <div class="admin-login-actions">
-
-        <button
-          type="submit"
-          class="primary-button"
-        >
-          Entrar
-        </button>
-
-        <button
-          type="button"
-          id="closeAdminLogin"
-          class="ghost-button"
-        >
-          Cancelar
-        </button>
+        <p>
+          El cliente siempre entra al menu.
+          El administrador inicia sesion desde el icono superior derecho.
+        </p>
 
       </div>
 
-    </form>
+      <div
+        class="hero-plate"
+        aria-hidden="true"
+      >
 
-  </dialog>
+        <img
+          src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
+          alt=""
+        >
 
-  <!-- CONTENIDO -->
+      </div>
 
-  <main class="container">
+    </section>
 
-    <!-- TOP BAR -->
+    <!-- MENU -->
 
-    <section class="top-bar">
+    <section
+      class="menu-section"
+      aria-labelledby="menuTitle"
+    >
 
-      <!-- TABS -->
+      <div class="section-heading">
 
-      <div id="tabsContainer"></div>
+        <div>
 
-      <!-- CARRITO -->
+          <p class="eyebrow">
+            Catalogo
+          </p>
 
-      <div class="cart-box">
+          <h2 id="menuTitle">
+            Menu del dia
+          </h2>
 
-        Carrito:
+        </div>
 
-        <span id="cartCount">
-          0
+        <span
+          class="item-count"
+          id="itemCount"
+        >
+          0 productos
         </span>
 
       </div>
 
-    </section>
-
-    <!-- LAYOUT -->
-
-    <section class="layout">
-
-      <!-- MENU -->
-
-      <section class="menu-section">
-
-        <div id="itemCount">
-          0 productos
-        </div>
-
-        <div id="menuGrid"></div>
-
-        <div
-          id="emptyState"
-          hidden
-        >
-          No hay productos disponibles
-        </div>
-
-      </section>
-
-      <!-- SIDEBAR -->
-
-      <aside
-        class="sidebar"
-        id="adminPanel"
-        hidden
-      >
-
-        <!-- CATEGORIAS -->
-
-        <section class="panel">
-
-          <h2>
-            Categorías
-          </h2>
-
-          <div class="category-manager">
-
-            <input
-              type="text"
-              id="newCategoryInput"
-              placeholder="Nueva categoria"
-            >
-
-            <button
-              type="button"
-              id="addCategoryButton"
-              class="primary-button"
-            >
-              Agregar
-            </button>
-
-          </div>
-
-        </section>
-
-        <!-- ADMIN FORM -->
-
-        <section class="panel">
-
-          <h2>
-            Agregar Producto
-          </h2>
-
-          <form id="adminForm">
-
-            <input
-              type="text"
-              id="foodName"
-              placeholder="Nombre"
-              required
-            >
-
-            <input
-              type="number"
-              id="foodPrice"
-              placeholder="Precio"
-              required
-            >
-
-            <select
-              id="foodCategory"
-              required
-            ></select>
-
-            <textarea
-              id="foodDescription"
-              placeholder="Descripción"
-              required
-            ></textarea>
-
-            <input
-              type="text"
-              id="foodImageUrl"
-              placeholder="URL Imagen"
-              required
-            >
-
-            <button
-              type="submit"
-              class="primary-button"
-            >
-              Guardar Producto
-            </button>
-
-          </form>
-
-        </section>
-
-        <!-- PEDIDOS -->
-
-        <section class="panel">
-
-          <h2>
-            Pedidos
-          </h2>
-
-          <div id="ordersList"></div>
-
-          <div
-            id="ordersEmpty"
-            hidden
-          >
-            No hay pedidos
-          </div>
-
-        </section>
-
-      </aside>
-
-    </section>
-
-    <!-- CARRITO -->
-
-    <section class="panel cart-panel">
-
-      <h2>
-        Carrito
-      </h2>
-
-      <div id="cartItems"></div>
+      <div
+        class="menu-grid"
+        id="menuGrid"
+      ></div>
 
       <div
-        id="cartEmpty"
+        class="empty-state"
+        id="emptyState"
         hidden
       >
-        El carrito está vacío
-      </div>
 
-      <div class="cart-total">
+        <strong>
+          No hay productos en esta categoria.
+        </strong>
 
-        Total:
-
-        <span id="cartTotal">
-          $0
+        <span>
+          Entra como administrador y agrega la primera comida.
         </span>
 
       </div>
@@ -319,83 +259,559 @@
 
   </main>
 
-  <!-- APP -->
+  <!-- ADMIN MODAL -->
 
-  <script type="module" src="app.js"></script>
+  <dialog
+    class="admin-modal"
+    id="adminModal"
+  >
 
-  <!-- LOGIN ADMIN -->
+    <div class="admin-panel">
 
-  <script>
+      <div class="modal-header">
 
-    const ADMIN_USER = "admin";
+        <div>
 
-    const ADMIN_PASSWORD = "admin123";
+          <p class="eyebrow">
+            Administrador
+          </p>
 
-    const adminToggle =
-      document.querySelector("#adminToggle");
+          <h2 id="adminPanelTitle">
+            Iniciar sesion
+          </h2>
 
-    const adminLoginModal =
-      document.querySelector("#adminLoginModal");
+        </div>
 
-    const adminLoginForm =
-      document.querySelector("#adminLoginForm");
+        <button
+          class="icon-button"
+          id="closeAdmin"
+          type="button"
+          aria-label="Cerrar"
+        >
 
-    const adminUsername =
-      document.querySelector("#adminUsername");
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
 
-    const adminUserPassword =
-      document.querySelector("#adminUserPassword");
+        </button>
 
-    const adminLoginError =
-      document.querySelector("#adminLoginError");
+      </div>
 
-    const closeAdminLogin =
-      document.querySelector("#closeAdminLogin");
+      <!-- LOGIN -->
 
-    const adminPanel =
-      document.querySelector("#adminPanel");
+      <form
+        class="login-form"
+        id="loginForm"
+      >
 
-    adminToggle.addEventListener("click", () => {
+        <label>
 
-      adminLoginModal.showModal();
+          <span>Usuario</span>
 
-    });
+          <input
+            id="adminUser"
+            type="text"
+            placeholder="admin"
+            required
+          >
 
-    closeAdminLogin.addEventListener("click", () => {
+        </label>
 
-      adminLoginModal.close();
+        <label>
 
-    });
+          <span>Contrasena</span>
 
-    adminLoginForm.addEventListener("submit", (event) => {
+          <input
+            id="adminPassword"
+            type="password"
+            placeholder="admin123"
+            required
+          >
 
-      event.preventDefault();
+        </label>
 
-      const validUser =
-        adminUsername.value.trim() === ADMIN_USER;
+        <p
+          class="login-error"
+          id="loginError"
+          hidden
+        >
+          Usuario o contrasena incorrectos.
+        </p>
 
-      const validPassword =
-        adminUserPassword.value === ADMIN_PASSWORD;
+        <button
+          class="primary-button"
+          type="submit"
+        >
+          Entrar
+        </button>
 
-      if (!validUser || !validPassword) {
+      </form>
 
-        adminLoginError.hidden = false;
+      <!-- PANEL ADMIN -->
 
-        return;
+      <div
+        class="admin-content"
+        id="adminContent"
+        hidden
+      >
 
-      }
+        <div class="admin-tabs">
 
-      adminLoginError.hidden = true;
+          <button
+            class="admin-tab is-active"
+            id="showProductsAdmin"
+            type="button"
+          >
+            Productos
+          </button>
 
-      adminPanel.hidden = false;
+          <button
+            class="admin-tab"
+            id="showOrdersAdmin"
+            type="button"
+          >
+            Pedidos
+          </button>
 
-      adminLoginModal.close();
+        </div>
 
-      adminLoginForm.reset();
+        <!-- PRODUCTOS -->
 
-    });
+        <section
+          class="admin-view is-active"
+          id="productsAdminView"
+        >
 
-  </script>
+          <!-- NUEVA CATEGORIA -->
+
+          <div class="category-creator">
+
+            <input
+              id="newCategoryInput"
+              type="text"
+              placeholder="Nueva categoria"
+            >
+
+            <button
+              id="addCategoryButton"
+              class="primary-button"
+              type="button"
+            >
+              Agregar categoria
+            </button>
+
+          </div>
+
+          <!-- FORM -->
+
+          <form
+            class="admin-form"
+            id="adminForm"
+          >
+
+            <div class="form-grid">
+
+              <label>
+
+                <span>Nombre</span>
+
+                <input
+                  id="foodName"
+                  type="text"
+                  required
+                >
+
+              </label>
+
+              <label>
+
+                <span>Precio</span>
+
+                <input
+                  id="foodPrice"
+                  type="number"
+                  required
+                >
+
+              </label>
+
+              <label>
+
+                <span>Categoria</span>
+
+                <select
+                  id="foodCategory"
+                  required
+                ></select>
+
+              </label>
+
+              <label>
+
+                <span>Imagen</span>
+
+                <input
+                  id="foodImageFile"
+                  type="file"
+                  accept="image/*"
+                >
+
+              </label>
+
+              <label class="full">
+
+                <span>URL imagen</span>
+
+                <input
+                  id="foodImageUrl"
+                  type="url"
+                >
+
+              </label>
+
+              <label class="full">
+
+                <span>Descripcion</span>
+
+                <textarea
+                  id="foodDescription"
+                  required
+                ></textarea>
+
+              </label>
+
+            </div>
+
+            <!-- PREVIEW -->
+
+            <div
+              class="preview-card"
+              id="previewCard"
+            >
+
+              <img
+                id="previewImage"
+                alt=""
+              >
+
+              <div>
+
+                <strong id="previewName">
+                  Vista previa
+                </strong>
+
+                <span id="previewDescription">
+                  Completa los datos.
+                </span>
+
+              </div>
+
+              <b id="previewPrice">
+                $0
+              </b>
+
+            </div>
+
+            <div class="modal-actions">
+
+              <button
+                class="ghost-button"
+                id="logoutAdmin"
+                type="button"
+              >
+                Cerrar sesion
+              </button>
+
+              <button
+                class="ghost-button"
+                id="clearMenu"
+                type="button"
+              >
+                Limpiar menu
+              </button>
+
+              <button
+                class="ghost-button"
+                id="cancelEdit"
+                type="button"
+                hidden
+              >
+                Cancelar
+              </button>
+
+              <button
+                class="primary-button"
+                id="saveFood"
+                type="submit"
+              >
+                Guardar producto
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+        <!-- PEDIDOS -->
+
+        <section
+          class="admin-view"
+          id="ordersAdminView"
+        >
+
+          <div
+            class="orders-list"
+            id="ordersList"
+          ></div>
+
+          <div
+            class="empty-state"
+            id="ordersEmpty"
+          >
+
+            <strong>
+              No hay pedidos confirmados.
+            </strong>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </div>
+
+  </dialog>
+
+  <!-- PRODUCT MODAL -->
+
+  <dialog
+    class="product-modal"
+    id="productModal"
+  >
+
+    <article class="product-detail">
+
+      <button
+        class="icon-button close-detail"
+        id="closeProduct"
+        type="button"
+      >
+
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+
+      </button>
+
+      <img
+        id="detailImage"
+        alt=""
+      >
+
+      <div class="product-detail-content">
+
+        <span
+          class="pill"
+          id="detailCategory"
+        >
+          Categoria
+        </span>
+
+        <h2 id="detailName">
+          Producto
+        </h2>
+
+        <p id="detailDescription">
+          Descripcion
+        </p>
+
+        <div class="detail-footer">
+
+          <strong id="detailPrice">
+            $0
+          </strong>
+
+          <button
+            class="primary-button"
+            id="detailAddCart"
+            type="button"
+          >
+            Añadir al carrito
+          </button>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </dialog>
+
+  <!-- CART -->
+
+  <dialog
+    class="cart-modal"
+    id="cartModal"
+  >
+
+    <section class="cart-panel">
+
+      <div class="modal-header">
+
+        <div>
+
+          <p class="eyebrow">
+            Pedido
+          </p>
+
+          <h2>
+            Carrito
+          </h2>
+
+        </div>
+
+        <button
+          class="icon-button"
+          id="closeCart"
+          type="button"
+        >
+
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+
+        </button>
+
+      </div>
+
+      <div
+        class="cart-items"
+        id="cartItems"
+      ></div>
+
+      <div
+        class="cart-empty"
+        id="cartEmpty"
+      >
+        Tu carrito esta vacio.
+      </div>
+
+      <div
+        class="cart-warning"
+        id="cartWarning"
+        hidden
+      >
+        NO HAY ARTICULOS
+      </div>
+
+      <div class="cart-total">
+
+        <span>Total</span>
+
+        <strong id="cartTotal">
+          $0
+        </strong>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          class="ghost-button"
+          id="clearCart"
+          type="button"
+        >
+          Vaciar carrito
+        </button>
+
+        <button
+          class="primary-button"
+          id="confirmOrder"
+          type="button"
+        >
+          Confirmar pedido
+        </button>
+
+      </div>
+
+    </section>
+
+  </dialog>
+
+  <!-- QR -->
+
+  <dialog
+    class="qr-modal"
+    id="qrModal"
+  >
+
+    <section class="qr-panel">
+
+      <div class="modal-header">
+
+        <div>
+
+          <p class="eyebrow">
+            Pago
+          </p>
+
+          <h2>
+            Escanea el QR
+          </h2>
+
+        </div>
+
+        <button
+          class="icon-button"
+          id="closeQr"
+          type="button"
+        >
+
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+
+        </button>
+
+      </div>
+
+      <img
+        class="qr-image"
+        id="paymentQr"
+        alt="QR"
+      >
+
+      <img
+        class="qr-brand"
+        src="assets/COOPESA-HORIZONTAL-3D.png"
+        alt="COOPESA"
+      >
+
+      <a
+        class="qr-link"
+        id="paymentLink"
+        href="#"
+        target="_blank"
+      >
+        Abrir enlace de pago
+      </a>
+
+    </section>
+
+  </dialog>
+
+  <!-- FIREBASE + APP -->
+
+  <script
+    type="module"
+    src="app.js?v=13"
+  ></script>
 
 </body>
 </html>
