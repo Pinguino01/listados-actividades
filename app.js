@@ -1,19 +1,26 @@
+# app.js
+
+```javascript
+// ===============================
+// FIREBASE IMPORTS
+// ===============================
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getFirestore,
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
   doc,
   updateDoc,
-  onSnapshot
+  onSnapshot,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================================
-   FIREBASE
-========================================= */
+// ===============================
+// FIREBASE CONFIG
+// ===============================
 
 const firebaseConfig = {
   apiKey: "AIzaSyCAHJvADlZAXkB5OTywm_Hn9t1sGo9acn0",
@@ -29,9 +36,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* =========================================
-   CONFIG
-========================================= */
+// ===============================
+// CONFIG
+// ===============================
 
 const CART_KEY = "burger-house-cart";
 const AUTH_KEY = "burger-house-admin-auth";
@@ -39,164 +46,53 @@ const AUTH_KEY = "burger-house-admin-auth";
 const ADMIN_USER = "admin";
 const ADMIN_PASSWORD = "admin123";
 
-const PAYMENT_LINK =
-  "https://apps.apple.com/do/app/coopesa-personal/id6760831661";
-
-/* =========================================
-   DOM
-========================================= */
+// ===============================
+// DOM
+// ===============================
 
 const menuGrid = document.querySelector("#menuGrid");
 const itemCount = document.querySelector("#itemCount");
 const emptyState = document.querySelector("#emptyState");
 
-const tabs = document.querySelectorAll(".tab");
+const tabsContainer = document.querySelector("#tabsContainer");
 
-const cartEntry = document.querySelector("#cartEntry");
 const cartCount = document.querySelector("#cartCount");
-
-const cartModal = document.querySelector("#cartModal");
-const closeCart = document.querySelector("#closeCart");
-
 const cartItems = document.querySelector("#cartItems");
-const cartEmpty = document.querySelector("#cartEmpty");
-const cartWarning = document.querySelector("#cartWarning");
 const cartTotal = document.querySelector("#cartTotal");
-
-const clearCart = document.querySelector("#clearCart");
-const confirmOrder = document.querySelector("#confirmOrder");
-
-const qrModal = document.querySelector("#qrModal");
-const closeQr = document.querySelector("#closeQr");
-
-const paymentQr = document.querySelector("#paymentQr");
-const paymentLink = document.querySelector("#paymentLink");
-
-const productModal = document.querySelector("#productModal");
-const closeProduct = document.querySelector("#closeProduct");
-
-const detailImage = document.querySelector("#detailImage");
-const detailCategory = document.querySelector("#detailCategory");
-const detailName = document.querySelector("#detailName");
-const detailDescription = document.querySelector("#detailDescription");
-const detailPrice = document.querySelector("#detailPrice");
-const detailAddCart = document.querySelector("#detailAddCart");
-
-const adminEntry = document.querySelector("#adminEntry");
-
-const adminModal = document.querySelector("#adminModal");
-const closeAdmin = document.querySelector("#closeAdmin");
-
-const adminPanelTitle = document.querySelector("#adminPanelTitle");
-
-const loginForm = document.querySelector("#loginForm");
-const loginError = document.querySelector("#loginError");
-
-const adminUser = document.querySelector("#adminUser");
-const adminPassword = document.querySelector("#adminPassword");
-
-const adminContent = document.querySelector("#adminContent");
-
-const showProductsAdmin =
-  document.querySelector("#showProductsAdmin");
-
-const showOrdersAdmin =
-  document.querySelector("#showOrdersAdmin");
-
-const productsAdminView =
-  document.querySelector("#productsAdminView");
-
-const ordersAdminView =
-  document.querySelector("#ordersAdminView");
+const cartEmpty = document.querySelector("#cartEmpty");
 
 const ordersList = document.querySelector("#ordersList");
 const ordersEmpty = document.querySelector("#ordersEmpty");
 
+const categoryInput = document.querySelector("#foodCategory");
+const newCategoryInput = document.querySelector("#newCategoryInput");
+const addCategoryButton = document.querySelector("#addCategoryButton");
+
 const adminForm = document.querySelector("#adminForm");
 
-const logoutAdmin = document.querySelector("#logoutAdmin");
+const nameInput = document.querySelector("#foodName");
+const priceInput = document.querySelector("#foodPrice");
+const descriptionInput = document.querySelector("#foodDescription");
+const imageUrl = document.querySelector("#foodImageUrl");
 
-const clearMenu = document.querySelector("#clearMenu");
-
-const cancelEdit = document.querySelector("#cancelEdit");
-
-const saveFood = document.querySelector("#saveFood");
-
-const imageFile =
-  document.querySelector("#foodImageFile");
-
-const imageUrl =
-  document.querySelector("#foodImageUrl");
-
-const nameInput =
-  document.querySelector("#foodName");
-
-const priceInput =
-  document.querySelector("#foodPrice");
-
-const categoryInput =
-  document.querySelector("#foodCategory");
-
-const descriptionInput =
-  document.querySelector("#foodDescription");
-
-const previewImage =
-  document.querySelector("#previewImage");
-
-const previewName =
-  document.querySelector("#previewName");
-
-const previewDescription =
-  document.querySelector("#previewDescription");
-
-const previewPrice =
-  document.querySelector("#previewPrice");
-
-/* =========================================
-   SCREENSAVER
-========================================= */
-
-const screensaver =
-  document.querySelector("#screensaver");
-
-const screensaverImage =
-  document.querySelector("#screensaverImage");
-
-const screensaverName =
-  document.querySelector("#screensaverName");
-
-const screensaverDescription =
-  document.querySelector("#screensaverDescription");
-
-const screensaverPrice =
-  document.querySelector("#screensaverPrice");
-
-/* =========================================
-   STATE
-========================================= */
+// ===============================
+// STATE
+// ===============================
 
 let activeCategory = "Todos";
 
-let currentImageData = "";
-
-let editingItemId = null;
-
-let selectedProductId = null;
-
-let isAdminLoggedIn =
-  sessionStorage.getItem(AUTH_KEY) === "true";
-
 let items = [];
-
 let orders = [];
+let categories = [];
 
 let cart = loadCart();
 
-/* =========================================
-   FIREBASE LISTENERS
-========================================= */
+// ===============================
+// FIREBASE LISTENERS
+// ===============================
 
 function listenProducts() {
+
   onSnapshot(collection(db, "products"), (snapshot) => {
 
     items = snapshot.docs.map((document) => ({
@@ -204,16 +100,15 @@ function listenProducts() {
       ...document.data()
     }));
 
-    cleanInvalidCartItems();
-
     renderMenu();
-
     renderCart();
 
   });
+
 }
 
 function listenOrders() {
+
   onSnapshot(collection(db, "orders"), (snapshot) => {
 
     orders = snapshot.docs.map((document) => ({
@@ -224,561 +119,498 @@ function listenOrders() {
     renderOrders();
 
   });
+
 }
 
-/* =========================================
-   INIT
-========================================= */
+function listenCategories() {
 
-listenProducts();
+  onSnapshot(collection(db, "categories"), (snapshot) => {
 
-listenOrders();
+    categories = snapshot.docs.map((document) => ({
+      id: document.id,
+      ...document.data()
+    }));
 
-renderCart();
-
-renderAdminState();
-
-updatePreview();
-
-/* =========================================
-   CATEGORY TABS
-========================================= */
-
-tabs.forEach((tab) => {
-
-  tab.addEventListener("click", () => {
-
-    activeCategory = tab.dataset.category;
-
-    tabs.forEach((button) => {
-
-      button.classList.toggle(
-        "is-active",
-        button === tab
-      );
-
-    });
-
-    renderMenu();
+    renderCategories();
 
   });
 
-});
+}
 
-/* =========================================
-   MODAL HELPERS
-========================================= */
+// ===============================
+// INIT
+// ===============================
 
-function openDialog(dialog) {
+listenProducts();
+listenOrders();
+listenCategories();
 
-  if (typeof dialog.showModal === "function") {
+renderCart();
 
-    dialog.showModal();
+// ===============================
+// CATEGORIES
+// ===============================
 
-    return;
+function renderCategories() {
 
-  }
+  categoryInput.innerHTML = categories
+    .map((category) => `
+      <option value="${escapeAttribute(category.name)}">
+        ${escapeHtml(category.name)}
+      </option>
+    `)
+    .join("");
 
-  dialog.setAttribute("open", "");
+  renderCategoryTabs();
 
 }
 
-function closeDialog(dialog) {
+function renderCategoryTabs() {
 
-  if (typeof dialog.close === "function") {
+  const allCategories = [
+    "Todos",
+    ...categories.map((category) => category.name)
+  ];
 
-    dialog.close();
+  tabsContainer.innerHTML = allCategories
+    .map((category) => `
 
-    return;
+      <button
+        class="tab ${activeCategory === category ? "is-active" : ""}"
+        data-category="${escapeAttribute(category)}"
+      >
+        ${escapeHtml(category)}
+      </button>
 
-  }
+    `)
+    .join("");
 
-  dialog.removeAttribute("open");
+  tabsContainer
+    .querySelectorAll(".tab")
+    .forEach((tab) => {
+
+      tab.addEventListener("click", () => {
+
+        activeCategory = tab.dataset.category;
+
+        renderCategoryTabs();
+        renderMenu();
+
+      });
+
+    });
 
 }
 
-/* =========================================
-   ADMIN MODAL
-========================================= */
+addCategoryButton.addEventListener("click", async () => {
 
-adminEntry.addEventListener("click", () => {
+  const categoryName = newCategoryInput.value.trim();
 
-  renderAdminState();
+  if (!categoryName) return;
 
-  openDialog(adminModal);
+  const exists = categories.some(
+    (category) =>
+      category.name.toLowerCase() ===
+      categoryName.toLowerCase()
+  );
 
-  (isAdminLoggedIn ? nameInput : adminUser).focus();
+  if (exists) {
 
-});
-
-closeAdmin.addEventListener("click", () => {
-
-  closeDialog(adminModal);
-
-});
-
-adminModal.addEventListener("click", (event) => {
-
-  if (event.target === adminModal) {
-
-    closeDialog(adminModal);
-
-  }
-
-});
-
-/* =========================================
-   CART MODAL
-========================================= */
-
-cartEntry.addEventListener("click", () => {
-
-  renderCart();
-
-  openDialog(cartModal);
-
-});
-
-closeCart.addEventListener("click", () => {
-
-  closeDialog(cartModal);
-
-});
-
-cartModal.addEventListener("click", (event) => {
-
-  if (event.target === cartModal) {
-
-    closeDialog(cartModal);
-
-  }
-
-});
-
-/* =========================================
-   CART ACTIONS
-========================================= */
-
-cartItems.addEventListener("click", (event) => {
-
-  const button =
-    event.target.closest("[data-cart-action]");
-
-  if (!button) return;
-
-  const { cartAction, id } = button.dataset;
-
-  if (cartAction === "increase") {
-
-    changeCartQuantity(id, 1);
+    alert("La categoria ya existe");
 
     return;
 
   }
 
-  if (cartAction === "decrease") {
+  try {
 
-    changeCartQuantity(id, -1);
+    await addDoc(collection(db, "categories"), {
+      name: categoryName
+    });
 
-    return;
+    newCategoryInput.value = "";
 
-  }
+  } catch (error) {
 
-  if (cartAction === "remove") {
+    console.error(error);
 
-    removeFromCart(id);
-
-  }
-
-});
-
-clearCart.addEventListener("click", () => {
-
-  cart = [];
-
-  saveCart();
-
-  renderCart();
-
-});
-
-/* =========================================
-   CONFIRM ORDER
-========================================= */
-
-confirmOrder.addEventListener("click", async () => {
-
-  if (cart.length === 0) {
-
-    cartWarning.hidden = false;
-
-    return;
-
-  }
-
-  cartWarning.hidden = true;
-
-  await saveConfirmedOrder();
-
-  paymentQr.src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(PAYMENT_LINK)}`;
-
-  paymentLink.href = PAYMENT_LINK;
-
-  openDialog(qrModal);
-
-});
-
-/* =========================================
-   QR MODAL
-========================================= */
-
-closeQr.addEventListener("click", () => {
-
-  closeDialog(qrModal);
-
-});
-
-qrModal.addEventListener("click", (event) => {
-
-  if (event.target === qrModal) {
-
-    closeDialog(qrModal);
+    alert("Error agregando categoria");
 
   }
 
 });
 
-/* =========================================
-   PRODUCT MODAL
-========================================= */
+// ===============================
+// SAVE PRODUCT
+// ===============================
 
-closeProduct.addEventListener("click", () => {
-
-  closeDialog(productModal);
-
-});
-
-productModal.addEventListener("click", (event) => {
-
-  if (event.target === productModal) {
-
-    closeDialog(productModal);
-
-  }
-
-});
-
-detailAddCart.addEventListener("click", () => {
-
-  if (!selectedProductId) return;
-
-  addToCart(selectedProductId);
-
-  closeDialog(productModal);
-
-});
-
-/* =========================================
-   LOGIN
-========================================= */
-
-loginForm.addEventListener("submit", (event) => {
+adminForm.addEventListener("submit", async (event) => {
 
   event.preventDefault();
 
-  const validUser =
-    adminUser.value.trim() === ADMIN_USER;
+  const product = {
+    name: nameInput.value.trim(),
+    price: Number(priceInput.value),
+    category: categoryInput.value,
+    description: descriptionInput.value.trim(),
+    image: imageUrl.value.trim()
+  };
 
-  const validPassword =
-    adminPassword.value === ADMIN_PASSWORD;
+  try {
 
-  if (!validUser || !validPassword) {
+    await addDoc(collection(db, "products"), product);
 
-    loginError.hidden = false;
+    adminForm.reset();
 
-    adminPassword.select();
+  } catch (error) {
 
-    return;
+    console.error(error);
 
-  }
-
-  isAdminLoggedIn = true;
-
-  sessionStorage.setItem(AUTH_KEY, "true");
-
-  loginError.hidden = true;
-
-  loginForm.reset();
-
-  renderAdminState();
-
-  renderMenu();
-
-  nameInput.focus();
-
-});
-
-/* =========================================
-   ADMIN TABS
-========================================= */
-
-showProductsAdmin.addEventListener("click", () => {
-
-  setAdminView("products");
-
-});
-
-showOrdersAdmin.addEventListener("click", () => {
-
-  setAdminView("orders");
-
-});
-
-/* =========================================
-   PREVIEW
-========================================= */
-
-[
-  nameInput,
-  priceInput,
-  descriptionInput,
-  imageUrl
-].forEach((field) => {
-
-  field.addEventListener("input", updatePreview);
-
-});
-
-categoryInput.addEventListener("change", () => {
-
-  if (categoryInput.value === "Hamburguesas") {
-
-    priceInput.value = 250;
+    alert("Error agregando producto");
 
   }
 
-  updatePreview();
-
 });
 
-/* =========================================
-   IMAGE UPLOAD
-========================================= */
+// ===============================
+// MENU
+// ===============================
 
-imageFile.addEventListener("change", async () => {
+function renderMenu() {
 
-  const file = imageFile.files?.[0];
-
-  if (!file) {
-
-    currentImageData = "";
-
-    updatePreview();
-
-    return;
-
-  }
-
-  currentImageData =
-    await readFileAsDataUrl(file);
-
-  updatePreview();
-
-});
-
-/* =========================================
-   SAVE PRODUCT
-========================================= */
-
-adminForm.addEventListener(
-  "submit",
-  async (event) => {
-
-    event.preventDefault();
-
-    if (!isAdminLoggedIn) return;
-
-    const editingItem = items.find(
-      (item) => item.id === editingItemId
-    );
-
-    const image =
-      currentImageData ||
-      imageUrl.value.trim() ||
-      editingItem?.image ||
-      fallbackImage();
-
-    const foodItem = normalizeItemPrice({
-      name: nameInput.value.trim(),
-      price: Number(priceInput.value),
-      category: categoryInput.value,
-      description: descriptionInput.value.trim(),
-      image
-    });
-
-    try {
-
-      if (editingItemId) {
-
-        await updateDoc(
-          doc(db, "products", editingItemId),
-          foodItem
-        );
-
-      } else {
-
-        await addDoc(
-          collection(db, "products"),
-          foodItem
-        );
-
-      }
-
-      resetForm();
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert("Error guardando producto");
-
-    }
-
-  }
-);
-
-/* =========================================
-   CLEAR MENU
-========================================= */
-
-clearMenu.addEventListener(
-  "click",
-  async () => {
-
-    if (!isAdminLoggedIn) return;
-
-    const confirmed = confirm(
-      "Quieres borrar todos los productos?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-
-      const snapshot = await getDocs(
-        collection(db, "products")
+  const visibleItems = activeCategory === "Todos"
+    ? items
+    : items.filter(
+        (item) => item.category === activeCategory
       );
 
-      const deletions = snapshot.docs.map(
-        (product) =>
-          deleteDoc(
-            doc(db, "products", product.id)
-          )
-      );
+  menuGrid.innerHTML = visibleItems
+    .map((item) => `
 
-      await Promise.all(deletions);
+      <article class="menu-card">
 
-      resetForm();
+        <img
+          src="${escapeAttribute(item.image)}"
+          alt="${escapeAttribute(item.name)}"
+        >
 
-    } catch (error) {
+        <h3>
+          ${escapeHtml(item.name)}
+        </h3>
 
-      console.error(error);
+        <p>
+          ${escapeHtml(item.description)}
+        </p>
 
-      alert("Error borrando productos");
+        <div class="card-footer">
 
-    }
+          <span>
+            $${formatPrice(item.price)}
+          </span>
 
-  }
-);
+          <button
+            data-add-cart="${item.id}"
+          >
+            Añadir
+          </button>
 
-/* =========================================
-   CANCEL EDIT
-========================================= */
+        </div>
 
-cancelEdit.addEventListener(
-  "click",
-  resetForm
-);
+      </article>
 
-/* =========================================
-   LOGOUT
-========================================= */
+    `)
+    .join("");
 
-logoutAdmin.addEventListener("click", () => {
+  itemCount.textContent = `${visibleItems.length} productos`;
 
-  isAdminLoggedIn = false;
+  emptyState.hidden = visibleItems.length > 0;
 
-  editingItemId = null;
+}
 
-  sessionStorage.removeItem(AUTH_KEY);
-
-  resetForm();
-
-  renderAdminState();
-
-  renderMenu();
-
-});
-
-/* =========================================
-   MENU ACTIONS
-========================================= */
+// ===============================
+// ADD TO CART
+// ===============================
 
 menuGrid.addEventListener("click", (event) => {
 
-  const actionButton =
-    event.target.closest("[data-action]");
+  const button = event.target.closest("[data-add-cart]");
 
-  if (!actionButton) return;
+  if (!button) return;
 
-  const { action, id } = actionButton.dataset;
+  addToCart(button.dataset.addCart);
 
-  if (action === "view") {
+});
 
-    showProduct(id);
+function addToCart(id) {
+
+  const existing = cart.find((item) => item.id === id);
+
+  if (existing) {
+
+    existing.quantity += 1;
+
+  } else {
+
+    cart.push({
+      id,
+      quantity: 1
+    });
+
+  }
+
+  saveCart();
+  renderCart();
+
+}
+
+function renderCart() {
+
+  const cartRows = cart
+    .map((entry) => {
+
+      const item = items.find(
+        (food) => food.id === entry.id
+      );
+
+      if (!item) return null;
+
+      return {
+        ...item,
+        quantity: entry.quantity
+      };
+
+    })
+    .filter(Boolean);
+
+  cartItems.innerHTML = cartRows
+    .map((item) => `
+
+      <div class="cart-row">
+
+        <strong>
+          ${escapeHtml(item.name)}
+        </strong>
+
+        <span>
+          ${item.quantity} x $${formatPrice(item.price)}
+        </span>
+
+      </div>
+
+    `)
+    .join("");
+
+  cartEmpty.hidden = cartRows.length > 0;
+
+  cartCount.textContent = cartRows.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  const total = cartRows.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  cartTotal.textContent = `$${formatPrice(total)}`;
+
+}
+
+// ===============================
+// SAVE ORDER
+// ===============================
+
+async function saveConfirmedOrder() {
+
+  const orderItems = cart
+    .map((entry) => {
+
+      const item = items.find(
+        (food) => food.id === entry.id
+      );
+
+      if (!item) return null;
+
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: entry.quantity
+      };
+
+    })
+    .filter(Boolean);
+
+  if (!orderItems.length) return;
+
+  const total = orderItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const order = {
+    createdAt: new Date().toISOString(),
+    items: orderItems,
+    total,
+    status: "Pendiente"
+  };
+
+  try {
+
+    await addDoc(collection(db, "orders"), order);
+
+    cart = [];
+
+    saveCart();
+    renderCart();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Error guardando pedido");
+
+  }
+
+}
+
+// ===============================
+// ORDERS
+// ===============================
+
+function renderOrders() {
+
+  ordersEmpty.hidden = orders.length > 0;
+
+  ordersList.innerHTML = orders
+    .map((order, index) => `
+
+      <article class="order-card status-${order.status.toLowerCase()}">
+
+        <div class="order-card-header">
+
+          <div>
+
+            <strong>
+              Pedido #${orders.length - index}
+            </strong>
+
+            <span>
+              ${formatOrderDate(order.createdAt)}
+            </span>
+
+          </div>
+
+          <div>
+
+            <b>
+              $${formatPrice(order.total)}
+            </b>
+
+            <span class="order-status">
+              ${escapeHtml(order.status)}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="order-items">
+
+          ${order.items
+            .map(
+              (item) => `
+
+                <div class="order-item">
+
+                  <span>
+                    ${escapeHtml(item.name)}
+                  </span>
+
+                  <small>
+                    ${item.quantity} x $${formatPrice(item.price)}
+                  </small>
+
+                </div>
+
+              `
+            )
+            .join("")}
+
+        </div>
+
+        <div class="order-actions">
+
+          <button
+            class="complete-order"
+            data-complete-order="${order.id}"
+          >
+            Completar
+          </button>
+
+          <button
+            class="cancel-order"
+            data-cancel-order="${order.id}"
+          >
+            Cancelar
+          </button>
+
+        </div>
+
+      </article>
+
+    `)
+    .join("");
+
+}
+
+ordersList.addEventListener("click", async (event) => {
+
+  const completeButton =
+    event.target.closest("[data-complete-order]");
+
+  const cancelButton =
+    event.target.closest("[data-cancel-order]");
+
+  if (completeButton) {
+
+    await completeOrder(
+      completeButton.dataset.completeOrder
+    );
 
     return;
 
   }
 
-  if (action === "cart") {
+  if (cancelButton) {
 
-    addToCart(id);
-
-    return;
-
-  }
-
-  if (!isAdminLoggedIn) return;
-
-  if (action === "edit") {
-
-    startEdit(id);
-
-    return;
-
-  }
-
-  if (action === "delete") {
-
-    deleteItem(id);
+    await cancelOrder(
+      cancelButton.dataset.cancelOrder
+    );
 
   }
 
 });
 
-/* =========================================
-   HELPERS
-========================================= */
+async function completeOrder(id) {
 
-function normalizeItemPrice(item) {
-
-  return item.category === "Hamburguesas"
-    ? { ...item, price: 250 }
-    : item;
+  await updateDoc(doc(db, "orders", id), {
+    status: "Completado"
+  });
 
 }
+
+async function cancelOrder(id) {
+
+  await updateDoc(doc(db, "orders", id), {
+    status: "Cancelado"
+  });
+
+}
+
+// ===============================
+// STORAGE
+// ===============================
 
 function loadCart() {
 
@@ -789,9 +621,7 @@ function loadCart() {
     );
 
     if (Array.isArray(stored)) {
-
       return stored;
-
     }
 
   } catch {
@@ -813,755 +643,9 @@ function saveCart() {
 
 }
 
-function cleanInvalidCartItems() {
-
-  cart = cart.filter((entry) =>
-    items.some((item) => item.id === entry.id)
-  );
-
-  saveCart();
-
-}
-
-/* =========================================
-   RENDER MENU
-========================================= */
-
-function renderMenu() {
-
-  const visibleItems =
-    activeCategory === "Todos"
-      ? items
-      : items.filter(
-          (item) =>
-            item.category === activeCategory
-        );
-
-  menuGrid.innerHTML = visibleItems
-    .map(
-      (item) => `
-      <article class="menu-card">
-
-        <div class="image-wrap">
-
-          <img
-            src="${escapeAttribute(item.image)}"
-            alt="${escapeAttribute(item.name)}"
-            loading="lazy"
-          >
-
-        </div>
-
-        <div class="menu-card-content">
-
-          <div>
-
-            <h3>
-              ${escapeHtml(item.name)}
-            </h3>
-
-            <p>
-              ${escapeHtml(item.description)}
-            </p>
-
-          </div>
-
-          <div class="card-footer">
-
-            <span class="price">
-              $${formatPrice(item.price)}
-            </span>
-
-            <span class="pill">
-              ${escapeHtml(item.category)}
-            </span>
-
-          </div>
-
-          <div class="customer-card-actions">
-
-            <button
-              class="ghost-button small-button"
-              type="button"
-              data-action="view"
-              data-id="${escapeAttribute(item.id)}"
-            >
-              Ver producto
-            </button>
-
-            <button
-              class="primary-button small-button"
-              type="button"
-              data-action="cart"
-              data-id="${escapeAttribute(item.id)}"
-            >
-              Añadir al carrito
-            </button>
-
-          </div>
-
-          ${
-            isAdminLoggedIn
-              ? `
-            <div class="admin-card-actions">
-
-              <button
-                class="ghost-button small-button"
-                type="button"
-                data-action="edit"
-                data-id="${escapeAttribute(item.id)}"
-              >
-                Editar
-              </button>
-
-              <button
-                class="danger-button small-button"
-                type="button"
-                data-action="delete"
-                data-id="${escapeAttribute(item.id)}"
-              >
-                Eliminar
-              </button>
-
-            </div>
-          `
-              : ""
-          }
-
-        </div>
-
-      </article>
-    `
-    )
-    .join("");
-
-  itemCount.textContent =
-    `${visibleItems.length} ${
-      visibleItems.length === 1
-        ? "producto"
-        : "productos"
-    }`;
-
-  emptyState.hidden =
-    visibleItems.length > 0;
-
-}
-
-/* =========================================
-   PREVIEW
-========================================= */
-
-function updatePreview() {
-
-  const editingItem = items.find(
-    (item) => item.id === editingItemId
-  );
-
-  const image =
-    currentImageData ||
-    imageUrl.value.trim() ||
-    editingItem?.image ||
-    fallbackImage();
-
-  previewImage.src = image;
-
-  previewName.textContent =
-    nameInput.value.trim() ||
-    "Vista previa";
-
-  previewDescription.textContent =
-    descriptionInput.value.trim() ||
-    "Completa los datos para ver como se vera en el menu.";
-
-  previewPrice.textContent =
-    `$${formatPrice(
-      Number(priceInput.value || 0)
-    )}`;
-
-}
-
-/* =========================================
-   RESET FORM
-========================================= */
-
-function resetForm() {
-
-  adminForm.reset();
-
-  currentImageData = "";
-
-  editingItemId = null;
-
-  priceInput.value = 250;
-
-  adminPanelTitle.textContent =
-    isAdminLoggedIn
-      ? "Agregar comida"
-      : "Iniciar sesion";
-
-  saveFood.textContent =
-    "Agregar producto";
-
-  cancelEdit.hidden = true;
-
-  updatePreview();
-
-}
-
-/* =========================================
-   ADMIN STATE
-========================================= */
-
-function renderAdminState() {
-
-  loginForm.style.display =
-    isAdminLoggedIn ? "none" : "grid";
-
-  adminContent.style.display =
-    isAdminLoggedIn ? "grid" : "none";
-
-  adminPanelTitle.textContent =
-    isAdminLoggedIn
-      ? editingItemId
-        ? "Editar comida"
-        : "Agregar comida"
-      : "Iniciar sesion";
-
-  if (isAdminLoggedIn) {
-
-    setAdminView("products");
-
-  }
-
-}
-
-function setAdminView(view) {
-
-  const showingOrders = view === "orders";
-
-  showProductsAdmin.classList.toggle(
-    "is-active",
-    !showingOrders
-  );
-
-  showOrdersAdmin.classList.toggle(
-    "is-active",
-    showingOrders
-  );
-
-  productsAdminView.classList.toggle(
-    "is-active",
-    !showingOrders
-  );
-
-  ordersAdminView.classList.toggle(
-    "is-active",
-    showingOrders
-  );
-
-  adminPanelTitle.textContent =
-    showingOrders
-      ? "Pedidos confirmados"
-      : editingItemId
-      ? "Editar comida"
-      : "Agregar comida";
-
-}
-
-/* =========================================
-   EDIT PRODUCT
-========================================= */
-
-function startEdit(id) {
-
-  const item = items.find(
-    (food) => food.id === id
-  );
-
-  if (!item) return;
-
-  setAdminView("products");
-
-  editingItemId = id;
-
-  nameInput.value = item.name;
-
-  priceInput.value = item.price;
-
-  categoryInput.value = item.category;
-
-  descriptionInput.value =
-    item.description;
-
-  imageUrl.value =
-    item.image.startsWith("data:")
-      ? ""
-      : item.image;
-
-  currentImageData =
-    item.image.startsWith("data:")
-      ? item.image
-      : "";
-
-  adminPanelTitle.textContent =
-    "Editar comida";
-
-  saveFood.textContent =
-    "Guardar cambios";
-
-  cancelEdit.hidden = false;
-
-  updatePreview();
-
-  openDialog(adminModal);
-
-  nameInput.focus();
-
-}
-
-/* =========================================
-   DELETE PRODUCT
-========================================= */
-
-async function deleteItem(id) {
-
-  const item = items.find(
-    (food) => food.id === id
-  );
-
-  if (!item) return;
-
-  const confirmed = confirm(
-    `Quieres eliminar "${item.name}" del menu?`
-  );
-
-  if (!confirmed) return;
-
-  try {
-
-    await deleteDoc(
-      doc(db, "products", id)
-    );
-
-    if (editingItemId === id) {
-
-      resetForm();
-
-    }
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert("Error eliminando producto");
-
-  }
-
-}
-
-/* =========================================
-   PRODUCT DETAIL
-========================================= */
-
-function showProduct(id) {
-
-  const item = items.find(
-    (food) => food.id === id
-  );
-
-  if (!item) return;
-
-  selectedProductId = id;
-
-  detailImage.src = item.image;
-
-  detailImage.alt = item.name;
-
-  detailCategory.textContent =
-    item.category;
-
-  detailName.textContent =
-    item.name;
-
-  detailDescription.textContent =
-    item.description;
-
-  detailPrice.textContent =
-    `$${formatPrice(item.price)}`;
-
-  openDialog(productModal);
-
-}
-
-/* =========================================
-   CART
-========================================= */
-
-function addToCart(id) {
-
-  const item = items.find(
-    (food) => food.id === id
-  );
-
-  if (!item) return;
-
-  const cartItem = cart.find(
-    (entry) => entry.id === id
-  );
-
-  if (cartItem) {
-
-    cartItem.quantity += 1;
-
-  } else {
-
-    cart.push({
-      id,
-      quantity: 1
-    });
-
-  }
-
-  saveCart();
-
-  renderCart();
-
-}
-
-function renderCart() {
-
-  const totalQuantity = cart.reduce(
-    (sum, entry) => sum + entry.quantity,
-    0
-  );
-
-  const cartRows = cart
-    .map((entry) => {
-
-      const item = items.find(
-        (food) => food.id === entry.id
-      );
-
-      if (!item) return null;
-
-      return {
-        ...item,
-        quantity: entry.quantity
-      };
-
-    })
-    .filter(Boolean);
-
-  cartCount.textContent =
-    totalQuantity;
-
-  cartEmpty.hidden =
-    cartRows.length > 0;
-
-  cartItems.hidden =
-    cartRows.length === 0;
-
-  cartWarning.hidden = true;
-
-  cartItems.innerHTML = cartRows
-    .map(
-      (item) => `
-      <article class="cart-row">
-
-        <img
-          src="${escapeAttribute(item.image)}"
-          alt="${escapeAttribute(item.name)}"
-        >
-
-        <div class="cart-row-info">
-
-          <strong>
-            ${escapeHtml(item.name)}
-          </strong>
-
-          <span>
-            $${formatPrice(item.price)} c/u
-          </span>
-
-          <div class="quantity-control">
-
-            <button
-              type="button"
-              data-cart-action="decrease"
-              data-id="${escapeAttribute(item.id)}"
-            >
-              -
-            </button>
-
-            <output>
-              ${item.quantity}
-            </output>
-
-            <button
-              type="button"
-              data-cart-action="increase"
-              data-id="${escapeAttribute(item.id)}"
-            >
-              +
-            </button>
-
-          </div>
-
-        </div>
-
-        <div class="cart-row-total">
-
-          <b>
-            $${formatPrice(
-              item.price * item.quantity
-            )}
-          </b>
-
-          <button
-            class="remove-cart-item"
-            type="button"
-            data-cart-action="remove"
-            data-id="${escapeAttribute(item.id)}"
-          >
-            Eliminar
-          </button>
-
-        </div>
-
-      </article>
-    `
-    )
-    .join("");
-
-  const total = cartRows.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  );
-
-  cartTotal.textContent =
-    `$${formatPrice(total)}`;
-
-}
-
-/* =========================================
-   CART HELPERS
-========================================= */
-
-function changeCartQuantity(id, amount) {
-
-  const cartItem = cart.find(
-    (entry) => entry.id === id
-  );
-
-  if (!cartItem) return;
-
-  cartItem.quantity += amount;
-
-  if (cartItem.quantity <= 0) {
-
-    removeFromCart(id);
-
-    return;
-
-  }
-
-  saveCart();
-
-  renderCart();
-
-}
-
-function removeFromCart(id) {
-
-  cart = cart.filter(
-    (entry) => entry.id !== id
-  );
-
-  saveCart();
-
-  renderCart();
-
-}
-
-/* =========================================
-   SAVE ORDER
-========================================= */
-
-async function saveConfirmedOrder() {
-
-  const orderItems = cart
-    .map((entry) => {
-
-      const item = items.find(
-        (food) => food.id === entry.id
-      );
-
-      if (!item) return null;
-
-      return {
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: entry.quantity,
-        image: item.image
-      };
-
-    })
-    .filter(Boolean);
-
-  if (!orderItems.length) return;
-
-  const total = orderItems.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  );
-
-  const order = {
-    createdAt: new Date().toISOString(),
-    items: orderItems,
-    total
-  };
-
-  try {
-
-    await addDoc(
-      collection(db, "orders"),
-      order
-    );
-
-    cart = [];
-
-    saveCart();
-
-    renderCart();
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert("Error guardando pedido");
-
-  }
-
-}
-
-/* =========================================
-   RENDER ORDERS
-========================================= */
-
-function renderOrders() {
-
-  if (!ordersList || !ordersEmpty) return;
-
-  ordersEmpty.hidden =
-    orders.length > 0;
-
-  ordersList.hidden =
-    orders.length === 0;
-
-  ordersList.innerHTML = orders
-    .map(
-      (order, index) => `
-      <article class="order-card">
-
-        <div class="order-card-header">
-
-          <div>
-
-            <strong>
-              Pedido #${orders.length - index}
-            </strong>
-
-            <span>
-              ${formatOrderDate(order.createdAt)}
-            </span>
-
-          </div>
-
-          <b>
-            $${formatPrice(order.total)}
-          </b>
-
-        </div>
-
-        <div class="order-items">
-
-          ${order.items
-            .map(
-              (item) => `
-              <div class="order-item">
-
-                <span>
-                  ${escapeHtml(item.name)}
-                </span>
-
-                <small>
-                  ${item.quantity} x $${formatPrice(item.price)}
-                </small>
-
-              </div>
-            `
-            )
-            .join("")}
-
-        </div>
-
-      </article>
-    `
-    )
-    .join("");
-
-}
-
-/* =========================================
-   UTILITIES
-========================================= */
-
-function formatOrderDate(value) {
-
-  return new Intl.DateTimeFormat(
-    "es",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    }
-  ).format(new Date(value));
-
-}
-
-function readFileAsDataUrl(file) {
-
-  return new Promise((resolve, reject) => {
-
-    const reader = new FileReader();
-
-    reader.addEventListener("load", () => {
-
-      resolve(reader.result);
-
-    });
-
-    reader.addEventListener(
-      "error",
-      reject
-    );
-
-    reader.readAsDataURL(file);
-
-  });
-
-}
-
-function fallbackImage() {
-
-  return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80";
-
-}
+// ===============================
+// HELPERS
+// ===============================
 
 function formatPrice(value) {
 
@@ -1570,6 +654,18 @@ function formatPrice(value) {
   return Number.isInteger(number)
     ? String(number)
     : number.toFixed(2);
+
+}
+
+function formatOrderDate(value) {
+
+  return new Intl.DateTimeFormat("es", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 
 }
 
@@ -1590,115 +686,159 @@ function escapeAttribute(value) {
     .replaceAll("`", "&#096;");
 
 }
+```
 
-/* =========================================
-   SCREENSAVER
-========================================= */
+---
 
-let screensaverTimer = null;
+# index.html
 
-let screensaverInterval = null;
+```html
+<script type="module" src="app.js"></script>
+```
 
-let currentScreensaverIndex = 0;
+---
 
-function showScreensaverProduct() {
+# HTML PANEL ADMIN
 
-  if (!items.length) return;
+```html
+<div class="category-manager">
 
-  const item =
-    items[
-      currentScreensaverIndex %
-        items.length
-    ];
+  <input
+    type="text"
+    id="newCategoryInput"
+    placeholder="Nueva categoria"
+  >
 
-  screensaverImage.src = item.image;
+  <button
+    type="button"
+    id="addCategoryButton"
+  >
+    Agregar categoria
+  </button>
 
-  screensaverName.textContent =
-    item.name;
+</div>
+```
 
-  screensaverDescription.textContent =
-    item.description;
+---
 
-  screensaverPrice.textContent =
-    `$${formatPrice(item.price)}`;
+# HTML TABS
 
+```html
+<div id="tabsContainer"></div>
+```
+
+---
+
+# CSS
+
+```css
+.category-manager {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-function startScreensaver() {
-
-  if (!items.length) return;
-
-  showScreensaverProduct();
-
-  screensaver.classList.add("active");
-
-  clearInterval(screensaverInterval);
-
-  screensaverInterval = setInterval(() => {
-
-    currentScreensaverIndex++;
-
-    showScreensaverProduct();
-
-  }, 5000);
-
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-function stopScreensaver() {
-
-  screensaver.classList.remove("active");
-
-  clearInterval(screensaverInterval);
-
-  resetScreensaverTimer();
-
+.status-pendiente .order-status {
+  background: #fff3cd;
+  color: #856404;
 }
 
-function resetScreensaverTimer() {
-
-  clearTimeout(screensaverTimer);
-
-  screensaverTimer = setTimeout(() => {
-
-    startScreensaver();
-
-  }, 60000);
-
+.status-completado .order-status {
+  background: #d1e7dd;
+  color: #0f5132;
 }
 
-[
-  "click",
-  "touchstart",
-  "mousemove",
-  "keydown",
-  "scroll"
-].forEach((eventName) => {
+.status-cancelado .order-status {
+  background: #f8d7da;
+  color: #842029;
+}
 
-  document.addEventListener(
-    eventName,
-    () => {
+.order-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
 
-      if (
-        screensaver.classList.contains(
-          "active"
-        )
-      ) {
+.complete-order {
+  background: #198754;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
 
-        stopScreensaver();
+.cancel-order {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+```
 
-        return;
+---
 
-      }
+# FIRESTORE RULES
 
-      resetScreensaverTimer();
+```js
+rules_version = '2';
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    match /{document=**} {
+
+      allow read, write: if true;
 
     }
-  );
 
-});
+  }
 
-window.addEventListener("load", () => {
+}
+```
 
-  resetScreensaverTimer();
+---
 
-});
+# FIREBASE COLLECTIONS
+
+```txt
+products
+orders
+categories
+```
+
+---
+
+# CATEGORY DOCUMENT
+
+```js
+{
+  name: "Hamburguesas"
+}
+```
+
+---
+
+# ORDER DOCUMENT
+
+```js
+{
+  createdAt: "2026-05-08T20:00:00.000Z",
+  total: 1000,
+  status: "Pendiente",
+  items: []
+}
+```
