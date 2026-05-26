@@ -63,7 +63,20 @@ const els = {
   attendeeCount: document.querySelector("#attendeeCount"),
   fieldCount: document.querySelector("#fieldCount"),
   syncStatus: document.querySelector("#syncStatus"),
-  emptyState: document.querySelector("#emptyState")
+  emptyState: document.querySelector("#emptyState"),
+  signatureModal: document.querySelector("#signatureModal"),
+  signatureTitle: document.querySelector("#signatureTitle"),
+  signatureCanvas: document.querySelector("#signatureCanvas"),
+  closeSignatureButton: document.querySelector("#closeSignatureButton"),
+  clearSignatureButton: document.querySelector("#clearSignatureButton"),
+  saveSignatureButton: document.querySelector("#saveSignatureButton")
+};
+
+const signatureState = {
+  attendeeId: null,
+  isDrawing: false,
+  hasInk: false,
+  context: els.signatureCanvas.getContext("2d")
 };
 
 function createId() {
@@ -85,7 +98,8 @@ function normalizeList(list) {
   const attendees = Array.isArray(list.attendees)
     ? list.attendees.map((attendee) => ({
         ...attendee,
-        attended: Boolean(attendee.attended)
+        attended: Boolean(attendee.attended),
+        signature: attendee.signature || ""
       }))
     : [];
 
@@ -360,12 +374,20 @@ function renderTable(list) {
 
     const actions = document.createElement("td");
     actions.className = "row-actions";
+
+    const signButton = document.createElement("button");
+    signButton.className = `sign-row${attendee.signature ? " has-signature" : ""}`;
+    signButton.type = "button";
+    signButton.textContent = "Firma";
+    signButton.dataset.signId = attendee.id;
+    signButton.title = attendee.signature ? "Editar firma" : "Registrar firma";
+
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-row";
     deleteButton.type = "button";
     deleteButton.textContent = "Quitar";
     deleteButton.dataset.deleteId = attendee.id;
-    actions.append(deleteButton);
+    actions.append(signButton, deleteButton);
     row.append(actions);
     els.attendeeBody.append(row);
   });
@@ -458,7 +480,7 @@ function updateFields(event) {
 function addAttendee() {
   const list = getActiveList();
   const formInputs = [...els.attendeeForm.querySelectorAll("input")];
-  const attendee = { id: createId(), attended: false };
+  const attendee = { id: createId(), attended: false, signature: "" };
 
   formInputs.forEach((input) => {
     attendee[input.name] = input.value.trim();
@@ -504,6 +526,100 @@ function updateAttendance(event) {
 
   attendee.attended = checkbox.checked;
   persistList(list);
+}
+
+function setupSignatureCanvas() {
+  const ctx = signatureState.context;
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#182126";
+}
+
+function clearSignatureCanvas() {
+  signatureState.context.clearRect(0, 0, els.signatureCanvas.width, els.signatureCanvas.height);
+  signatureState.hasInk = false;
+}
+
+function getCanvasPoint(event) {
+  const rect = els.signatureCanvas.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * els.signatureCanvas.width,
+    y: ((event.clientY - rect.top) / rect.height) * els.signatureCanvas.height
+  };
+}
+
+function loadSignatureImage(signature) {
+  clearSignatureCanvas();
+  if (!signature) return;
+
+  const image = new Image();
+  image.onload = () => {
+    signatureState.context.drawImage(image, 0, 0, els.signatureCanvas.width, els.signatureCanvas.height);
+    signatureState.hasInk = true;
+  };
+  image.src = signature;
+}
+
+function openSignatureModal(attendeeId) {
+  const list = getActiveList();
+  const attendee = list.attendees.find((item) => item.id === attendeeId);
+  if (!attendee) return;
+
+  signatureState.attendeeId = attendeeId;
+  els.signatureTitle.textContent = attendee.name ? `Firma de ${attendee.name}` : "Registrar firma";
+  els.signatureModal.classList.add("is-open");
+  els.signatureModal.setAttribute("aria-hidden", "false");
+  loadSignatureImage(attendee.signature);
+}
+
+function closeSignatureModal() {
+  signatureState.attendeeId = null;
+  signatureState.isDrawing = false;
+  els.signatureModal.classList.remove("is-open");
+  els.signatureModal.setAttribute("aria-hidden", "true");
+  clearSignatureCanvas();
+}
+
+function startSignatureStroke(event) {
+  event.preventDefault();
+  signatureState.isDrawing = true;
+  signatureState.hasInk = true;
+  const point = getCanvasPoint(event);
+  signatureState.context.beginPath();
+  signatureState.context.moveTo(point.x, point.y);
+}
+
+function drawSignatureStroke(event) {
+  if (!signatureState.isDrawing) return;
+
+  event.preventDefault();
+  const point = getCanvasPoint(event);
+  signatureState.context.lineTo(point.x, point.y);
+  signatureState.context.stroke();
+}
+
+function endSignatureStroke() {
+  if (!signatureState.isDrawing) return;
+  signatureState.isDrawing = false;
+  signatureState.context.closePath();
+}
+
+function saveSignature() {
+  const list = getActiveList();
+  const attendee = list.attendees.find((item) => item.id === signatureState.attendeeId);
+  if (!attendee) return;
+
+  attendee.signature = signatureState.hasInk ? els.signatureCanvas.toDataURL("image/png") : "";
+  persistList(list);
+  render();
+  closeSignatureModal();
+}
+
+function openSignatureFromRow(event) {
+  const button = event.target.closest("[data-sign-id]");
+  if (!button) return;
+  openSignatureModal(button.dataset.signId);
 }
 
 function removeAttendee(event) {
@@ -554,7 +670,28 @@ els.attendeeForm.addEventListener("keydown", (event) => {
 
 els.attendeeBody.addEventListener("input", updateAttendee);
 els.attendeeBody.addEventListener("change", updateAttendance);
+els.attendeeBody.addEventListener("click", openSignatureFromRow);
 els.attendeeBody.addEventListener("click", removeAttendee);
+
+els.signatureCanvas.addEventListener("pointerdown", startSignatureStroke);
+els.signatureCanvas.addEventListener("pointermove", drawSignatureStroke);
+els.signatureCanvas.addEventListener("pointerup", endSignatureStroke);
+els.signatureCanvas.addEventListener("pointerleave", endSignatureStroke);
+els.signatureCanvas.addEventListener("pointercancel", endSignatureStroke);
+els.clearSignatureButton.addEventListener("click", clearSignatureCanvas);
+els.saveSignatureButton.addEventListener("click", saveSignature);
+els.closeSignatureButton.addEventListener("click", closeSignatureModal);
+els.signatureModal.addEventListener("click", (event) => {
+  if (event.target === els.signatureModal) {
+    closeSignatureModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && els.signatureModal.classList.contains("is-open")) {
+    closeSignatureModal();
+  }
+});
 
 els.attendeeSearch.addEventListener("input", (event) => {
   state.attendeeSearch = event.target.value;
@@ -566,6 +703,7 @@ els.clearSearchButton.addEventListener("click", () => {
   render();
 });
 
+setupSignatureCanvas();
 loadLocalState();
 render();
 startFirebaseSync();

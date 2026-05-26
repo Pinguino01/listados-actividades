@@ -90,6 +90,23 @@
       </button>
     </template>
 
+    <div class="signature-modal" id="signatureModal" aria-hidden="true">
+      <div class="signature-dialog" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
+        <div class="signature-header">
+          <div>
+            <p class="section-label">Firma del asistente</p>
+            <h2 id="signatureTitle">Registrar firma</h2>
+          </div>
+          <button class="secondary" id="closeSignatureButton" type="button">Cerrar</button>
+        </div>
+        <canvas id="signatureCanvas" width="760" height="260" aria-label="Area para firmar"></canvas>
+        <div class="signature-actions">
+          <button class="secondary" id="clearSignatureButton" type="button">Limpiar</button>
+          <button class="primary" id="saveSignatureButton" type="button">Guardar firma</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="script.js"></script>
   </body>
 </html>
