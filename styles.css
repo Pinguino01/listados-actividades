@@ -391,6 +391,24 @@ td input {
   min-width: 140px;
 }
 
+.attendance-check {
+  display: grid;
+  grid-template-columns: 22px minmax(160px, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.attendance-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  accent-color: var(--accent);
+}
+
+.attendance-check input[type="text"] {
+  min-width: 0;
+}
+
 .row-actions {
   width: 92px;
   text-align: right;
@@ -514,5 +532,24 @@ td input {
     border: 0;
     box-shadow: none;
     padding: 0;
+  }
+
+  .attendance-check {
+    grid-template-columns: 18px minmax(0, 1fr);
+  }
+
+  .attendance-check input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid #000;
+    width: 13px;
+    height: 13px;
+  }
+
+  .attendance-check input[type="checkbox"]:checked::after {
+    content: "X";
+    display: block;
+    font-size: 10px;
+    line-height: 11px;
+    text-align: center;
   }
 }

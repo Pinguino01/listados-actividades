@@ -82,11 +82,18 @@ function createBlankList(title = "Nueva actividad") {
 }
 
 function normalizeList(list) {
+  const attendees = Array.isArray(list.attendees)
+    ? list.attendees.map((attendee) => ({
+        ...attendee,
+        attended: Boolean(attendee.attended)
+      }))
+    : [];
+
   return {
     id: list.id,
     title: list.title || "Sin titulo",
     fields: Array.isArray(list.fields) && list.fields.length ? list.fields : [...defaultFields],
-    attendees: Array.isArray(list.attendees) ? list.attendees : [],
+    attendees,
     createdAt: list.createdAt || new Date().toISOString(),
     updatedAt: list.updatedAt || new Date().toISOString()
   };
@@ -330,7 +337,24 @@ function renderTable(list) {
       input.value = attendee[fieldId] || "";
       input.dataset.field = fieldId;
       input.setAttribute("aria-label", field?.label || fieldId);
-      td.append(input);
+
+      if (fieldId === "name") {
+        const checkedLabel = document.createElement("label");
+        checkedLabel.className = "attendance-check";
+        checkedLabel.title = "Marcar asistencia";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = Boolean(attendee.attended);
+        checkbox.dataset.attended = attendee.id;
+        checkbox.setAttribute("aria-label", `Marcar asistencia de ${attendee[fieldId] || "asistente"}`);
+
+        checkedLabel.append(checkbox, input);
+        td.append(checkedLabel);
+      } else {
+        td.append(input);
+      }
+
       row.append(td);
     });
 
@@ -434,7 +458,7 @@ function updateFields(event) {
 function addAttendee() {
   const list = getActiveList();
   const formInputs = [...els.attendeeForm.querySelectorAll("input")];
-  const attendee = { id: createId() };
+  const attendee = { id: createId(), attended: false };
 
   formInputs.forEach((input) => {
     attendee[input.name] = input.value.trim();
@@ -468,6 +492,18 @@ function updateAttendee(event) {
   persistList(list);
   renderLists();
   els.attendeeCount.textContent = plural(list.attendees.length, "asistente", "asistentes");
+}
+
+function updateAttendance(event) {
+  const checkbox = event.target.closest("tbody input[data-attended]");
+  if (!checkbox) return;
+
+  const list = getActiveList();
+  const attendee = list.attendees.find((item) => item.id === checkbox.dataset.attended);
+  if (!attendee) return;
+
+  attendee.attended = checkbox.checked;
+  persistList(list);
 }
 
 function removeAttendee(event) {
@@ -517,6 +553,7 @@ els.attendeeForm.addEventListener("keydown", (event) => {
 });
 
 els.attendeeBody.addEventListener("input", updateAttendee);
+els.attendeeBody.addEventListener("change", updateAttendance);
 els.attendeeBody.addEventListener("click", removeAttendee);
 
 els.attendeeSearch.addEventListener("input", (event) => {
