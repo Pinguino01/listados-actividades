@@ -3,7 +3,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs,
   getFirestore,
   onSnapshot,
   setDoc
@@ -25,7 +24,6 @@ const COLLECTION_NAME = "attendanceLists";
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const listsCollection = collection(db, COLLECTION_NAME);
-const FIREBASE_TIMEOUT_MS = 8000;
 
 const fields = [
   { id: "name", label: "Nombre", type: "text" },
@@ -43,7 +41,8 @@ const state = {
   listSearch: "",
   attendeeSearch: "",
   firebaseReady: false,
-  applyingRemote: false
+  applyingRemote: false,
+  uploadedInitialLocalLists: false
 };
 
 const els = {
@@ -98,15 +97,6 @@ function setSyncStatus(text, status = "waiting") {
   els.syncStatus.className = `sync-${status}`;
 }
 
-function withTimeout(promise, message) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      window.setTimeout(() => reject(new Error(message)), FIREBASE_TIMEOUT_MS);
-    })
-  ]);
-}
-
 function loadLocalState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
@@ -133,51 +123,70 @@ function saveLocalState() {
   localStorage.setItem(ACTIVE_KEY, state.activeId || "");
 }
 
+function getFirebaseErrorMessage(error) {
+  if (error?.code === "permission-denied") {
+    return "Firebase sin permisos";
+  }
+
+  if (error?.code === "unavailable") {
+    return "Firebase sin conexion";
+  }
+
+  if (error?.code === "not-found") {
+    return "Firestore no creado";
+  }
+
+  return "Error de Firebase";
+}
+
 async function saveListToFirebase(list) {
   if (state.applyingRemote) return;
 
+  setSyncStatus("Guardando Firebase", "waiting");
+
   try {
-    await withTimeout(
-      setDoc(doc(db, COLLECTION_NAME, list.id), normalizeList(list)),
-      "Firebase tardo demasiado en guardar"
-    );
+    await setDoc(doc(db, COLLECTION_NAME, list.id), normalizeList(list));
     setSyncStatus("Guardado en Firebase", "ok");
   } catch (error) {
     console.error(error);
-    setSyncStatus("Guardado local", "error");
+    setSyncStatus(getFirebaseErrorMessage(error), "error");
   }
 }
 
 async function deleteListFromFirebase(listId) {
+  setSyncStatus("Eliminando Firebase", "waiting");
+
   try {
-    await withTimeout(
-      deleteDoc(doc(db, COLLECTION_NAME, listId)),
-      "Firebase tardo demasiado en eliminar"
-    );
+    await deleteDoc(doc(db, COLLECTION_NAME, listId));
     setSyncStatus("Guardado en Firebase", "ok");
   } catch (error) {
     console.error(error);
-    setSyncStatus("Eliminado solo local", "error");
+    setSyncStatus(getFirebaseErrorMessage(error), "error");
   }
 }
 
-async function uploadLocalListsIfFirebaseIsEmpty() {
-  const snapshot = await withTimeout(
-    getDocs(listsCollection),
-    "Firebase tardo demasiado en consultar"
-  );
-  if (!snapshot.empty) return;
+async function uploadInitialLocalLists() {
+  if (state.uploadedInitialLocalLists || !state.lists.length) return;
+
+  state.uploadedInitialLocalLists = true;
+  setSyncStatus("Subiendo listados", "waiting");
   await Promise.all(state.lists.map((list) => saveListToFirebase(list)));
 }
 
 function subscribeToFirebase() {
   onSnapshot(
     listsCollection,
-    (snapshot) => {
+    async (snapshot) => {
+      state.firebaseReady = true;
+
+      if (snapshot.empty) {
+        await uploadInitialLocalLists();
+        return;
+      }
+
       const remoteLists = snapshot.docs
         .map((item) => normalizeList({ id: item.id, ...item.data() }))
         .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
-      if (!remoteLists.length) return;
 
       state.applyingRemote = true;
       state.lists = remoteLists;
@@ -187,27 +196,19 @@ function subscribeToFirebase() {
       saveLocalState();
       render();
       state.applyingRemote = false;
-      state.firebaseReady = true;
       setSyncStatus("Conectado a Firebase", "ok");
     },
     (error) => {
       console.error(error);
       state.firebaseReady = false;
-      setSyncStatus("Sin conexion Firebase", "error");
+      setSyncStatus(getFirebaseErrorMessage(error), "error");
     }
   );
 }
 
-async function startFirebaseSync() {
+function startFirebaseSync() {
   setSyncStatus("Conectando Firebase", "waiting");
   subscribeToFirebase();
-
-  try {
-    await uploadLocalListsIfFirebaseIsEmpty();
-  } catch (error) {
-    console.error(error);
-    setSyncStatus("Usando guardado local", "error");
-  }
 }
 
 function getActiveList() {
