@@ -27,6 +27,7 @@ const listsCollection = collection(db, COLLECTION_NAME);
 
 const fields = [
   { id: "name", label: "Nombre", type: "text" },
+  { id: "cedula", label: "Cedula", type: "text" },
   { id: "institution", label: "Institucion", type: "text" },
   { id: "phone", label: "Numero de telefono", type: "tel" },
   { id: "email", label: "Correo", type: "email" },
