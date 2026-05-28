@@ -606,6 +606,10 @@ td input {
     padding: 8px;
   }
 
+  tbody tr:not(.print-selected) {
+    display: none;
+  }
+
   td input {
     border: 0;
     box-shadow: none;

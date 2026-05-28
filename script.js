@@ -343,6 +343,7 @@ function renderTable(list) {
   visibleAttendees.forEach((attendee) => {
     const row = document.createElement("tr");
     row.dataset.id = attendee.id;
+    row.classList.toggle("print-selected", Boolean(attendee.attended));
 
     list.fields.forEach((fieldId) => {
       const td = document.createElement("td");
@@ -526,6 +527,7 @@ function updateAttendance(event) {
   if (!attendee) return;
 
   attendee.attended = checkbox.checked;
+  checkbox.closest("tr")?.classList.toggle("print-selected", checkbox.checked);
   persistList(list);
 }
 
